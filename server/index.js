@@ -22,6 +22,7 @@ const app = express();
 const port = Number(process.env.BOOKING_SERVER_PORT || 8787);
 const publicAppUrl = process.env.PUBLIC_APP_URL || `http://localhost:${port}`;
 const reminderWindowMs = 24 * 60 * 60 * 1000;
+const smtpTimeoutMs = Number(process.env.SMTP_TIMEOUT_MS || 12000);
 const adminUsername = process.env.ADMIN_USERNAME || 'admin';
 const adminPassword = process.env.ADMIN_PASSWORD || 'change-me-now';
 const sessionSecret = process.env.ADMIN_SESSION_SECRET || crypto.randomBytes(48).toString('hex');
@@ -285,6 +286,9 @@ async function getMailer() {
         port: smtpPort,
         secure: smtpPort === 465,
         auth: {user, pass},
+        connectionTimeout: smtpTimeoutMs,
+        greetingTimeout: smtpTimeoutMs,
+        socketTimeout: smtpTimeoutMs,
       });
     }
 
@@ -297,6 +301,9 @@ async function getMailer() {
         user: testAccount.user,
         pass: testAccount.pass,
       },
+      connectionTimeout: smtpTimeoutMs,
+      greetingTimeout: smtpTimeoutMs,
+      socketTimeout: smtpTimeoutMs,
     });
   })();
 
@@ -306,13 +313,18 @@ async function getMailer() {
 async function sendBookingEmail({to, subject, html, text}) {
   const transporter = await getMailer();
   const from = process.env.MAIL_FROM || 'Alba Music Academy <no-reply@albamusic.local>';
-  const info = await transporter.sendMail({
-    from,
-    to,
-    subject,
-    html,
-    text,
-  });
+  const info = await Promise.race([
+    transporter.sendMail({
+      from,
+      to,
+      subject,
+      html,
+      text,
+    }),
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(`smtp timeout after ${smtpTimeoutMs}ms`)), smtpTimeoutMs);
+    }),
+  ]);
 
   const preview = nodemailer.getTestMessageUrl(info);
   if (preview) {

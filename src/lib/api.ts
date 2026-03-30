@@ -7,18 +7,30 @@ const runtimeFallbackApiUrl =
     : '';
 
 export const API_URL = (rawApiUrl || runtimeFallbackApiUrl).replace(/\/$/, '');
+const apiTimeoutMs = Number(import.meta.env.VITE_API_TIMEOUT_MS || 20000);
 
 export async function apiCall(
   endpoint: string,
   options?: RequestInit,
 ): Promise<any> {
   const url = `${API_URL}${endpoint}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), apiTimeoutMs);
+
   const response = await fetch(url, {
     ...options,
+    signal: controller.signal,
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
     },
+  }).catch((error) => {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error(`La richiesta sta impiegando troppo tempo (${apiTimeoutMs / 1000}s). Riprova.`);
+    }
+    throw error;
+  }).finally(() => {
+    clearTimeout(timeout);
   });
 
   if (!response.ok) {
