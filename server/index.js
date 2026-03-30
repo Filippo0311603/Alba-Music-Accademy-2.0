@@ -437,11 +437,11 @@ async function sendBookingEmail({to, subject, html, text}) {
 }
 
 function buildCancelUrl(cancelToken) {
-  return `${publicAppUrl}/api/bookings/cancel/${cancelToken}`;
+  return `${publicAppUrl}/booking/cancel/${cancelToken}`;
 }
 
 function buildConfirmUrl(confirmToken) {
-  return `${publicAppUrl}/api/bookings/confirm/${confirmToken}`;
+  return `${publicAppUrl}/booking/confirm/${confirmToken}`;
 }
 
 async function confirmBookingByToken(confirmToken) {
@@ -699,47 +699,91 @@ app.post('/api/bookings', async (req, res) => {
 
 async function handleConfirmBooking(req, res) {
   const {token} = req.params;
+  return res.redirect(302, `${publicAppUrl}/booking/confirm/${token}`);
+}
+
+async function handleConfirmBookingActionApi(req, res) {
+  const {token} = req.params;
   const outcome = await confirmBookingByToken(token);
 
   if (outcome.type === 'not-found') {
-    return res.status(404).send('<h1>Richiesta non trovata</h1><p>Il link non e valido.</p>');
+    return res.status(404).json({
+      type: outcome.type,
+      title: 'Richiesta non trovata',
+      message: 'Il link non e valido.',
+    });
   }
 
   if (outcome.type === 'cancelled') {
-    return res.status(409).send('<h1>Richiesta annullata</h1><p>Questa prenotazione e gia stata annullata.</p>');
+    return res.status(409).json({
+      type: outcome.type,
+      title: 'Richiesta annullata',
+      message: 'Questa prenotazione e gia stata annullata.',
+    });
   }
 
   if (outcome.type === 'already-confirmed') {
-    return res.status(200).send('<h1>Prenotazione gia confermata</h1><p>La tua prenotazione risulta gia attiva.</p>');
+    return res.status(200).json({
+      type: outcome.type,
+      title: 'Prenotazione gia confermata',
+      message: 'La tua prenotazione risulta gia attiva.',
+    });
   }
 
   if (outcome.type === 'slot-taken') {
-    return res.status(409).send('<h1>Slot non piu disponibile</h1><p>Lo slot e stato gia confermato da un altra richiesta. Prenota un altro orario dal sito.</p>');
+    return res.status(409).json({
+      type: outcome.type,
+      title: 'Slot non piu disponibile',
+      message: 'Lo slot e stato gia confermato da un altra richiesta. Prenota un altro orario dal sito.',
+    });
   }
 
-  return res.status(200).send('<h1>Prenotazione confermata</h1><p>La tua prenotazione e ora attiva. Ti aspettiamo in accademia.</p>');
+  return res.status(200).json({
+    type: outcome.type,
+    title: 'Prenotazione confermata',
+    message: 'La tua prenotazione e ora attiva. Ti aspettiamo in accademia.',
+  });
 }
 
 app.get('/api/bookings/confirm/:token', handleConfirmBooking);
 app.get('/bookings/confirm/:token', handleConfirmBooking);
+app.get('/api/bookings/action/confirm/:token', handleConfirmBookingActionApi);
 
 async function handleCancelBooking(req, res) {
+  const {token} = req.params;
+  return res.redirect(302, `${publicAppUrl}/booking/cancel/${token}`);
+}
+
+async function handleCancelBookingActionApi(req, res) {
   const {token} = req.params;
   const outcome = await cancelBookingByToken(token);
 
   if (outcome.type === 'not-found') {
-    return res.status(404).send('<h1>Prenotazione non trovata</h1><p>Il link non e valido.</p>');
+    return res.status(404).json({
+      type: outcome.type,
+      title: 'Prenotazione non trovata',
+      message: 'Il link non e valido.',
+    });
   }
 
   if (outcome.type === 'already-cancelled') {
-    return res.status(200).send('<h1>Prenotazione gia disdetta</h1><p>Lo slot risulta gia disponibile.</p>');
+    return res.status(200).json({
+      type: outcome.type,
+      title: 'Prenotazione gia disdetta',
+      message: 'Lo slot risulta gia disponibile.',
+    });
   }
 
-  return res.status(200).send('<h1>Prenotazione disdetta con successo</h1><p>Lo slot e stato liberato ed e di nuovo disponibile sul sito.</p>');
+  return res.status(200).json({
+    type: outcome.type,
+    title: 'Prenotazione disdetta con successo',
+    message: 'Lo slot e stato liberato ed e di nuovo disponibile sul sito.',
+  });
 }
 
 app.get('/api/bookings/cancel/:token', handleCancelBooking);
 app.get('/bookings/cancel/:token', handleCancelBooking);
+app.get('/api/bookings/action/cancel/:token', handleCancelBookingActionApi);
 
 app.post('/api/admin/auth/login', async (req, res) => {
   try {
