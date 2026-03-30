@@ -17,7 +17,7 @@ services:
       - key: ADMIN_SESSION_SECRET
         generateValue: true
       - key: ADMIN_ALLOWED_ORIGINS
-        value: https://alba-music-academy.vercel.app
+        value: https://alba-music-accademy-frontend.vercel.app
       - key: SMTP_HOST
         value: in-v3.mailjet.com
       - key: SMTP_PORT
@@ -29,4 +29,4 @@ services:
       - key: MAIL_FROM
         value: Alba Music Academy <filippoleotta06@gmail.com>
       - key: PUBLIC_APP_URL
-        value: https://alba-music-backend.onrender.com
+        value: https://alba-music-accademy-2-0.onrender.com
