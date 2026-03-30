@@ -23,6 +23,8 @@ const port = Number(process.env.BOOKING_SERVER_PORT || 8787);
 const publicAppUrl = process.env.PUBLIC_APP_URL || `http://localhost:${port}`;
 const reminderWindowMs = 24 * 60 * 60 * 1000;
 const smtpTimeoutMs = Number(process.env.SMTP_TIMEOUT_MS || 12000);
+const mailjetApiTimeoutMs = Number(process.env.MAILJET_API_TIMEOUT_MS || 15000);
+const mailjetApiEndpoint = String(process.env.MAILJET_API_ENDPOINT || 'https://api.mailjet.com/v3.1/send').trim();
 const smtpFallbackPorts = String(process.env.SMTP_FALLBACK_PORTS || '587,465,2525')
   .split(',')
   .map((value) => Number(value.trim()))
@@ -330,6 +332,55 @@ async function sendBookingEmail({to, subject, html, text}) {
       console.log(`[mail-preview] ${preview}`);
     }
     return;
+  }
+
+  const smtpHost = String(process.env.SMTP_HOST || '').toLowerCase();
+  const shouldTryMailjetApiFirst = smtpHost.includes('mailjet') && process.env.MAILJET_API_ENABLED !== 'false';
+
+  if (shouldTryMailjetApiFirst) {
+    const match = from.match(/^(.*)<([^>]+)>\s*$/);
+    const fromName = match ? match[1].trim().replace(/^"|"$/g, '') : 'Alba Music Academy';
+    const fromEmail = match ? match[2].trim() : from.trim();
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), mailjetApiTimeoutMs);
+
+    try {
+      const auth = Buffer.from(`${mailer.user}:${mailer.pass}`).toString('base64');
+      const response = await fetch(mailjetApiEndpoint, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          Messages: [
+            {
+              From: {Email: fromEmail, Name: fromName || 'Alba Music Academy'},
+              To: [{Email: String(to)}],
+              Subject: String(subject),
+              TextPart: String(text || ''),
+              HTMLPart: String(html || ''),
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const details = await response.text();
+        throw new Error(`mailjet api ${response.status}: ${details}`);
+      }
+
+      return;
+    } catch (error) {
+      console.error('[mailjet-api] send failed, fallback to smtp', {
+        message: error?.message,
+        name: error?.name,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   let lastError = null;
