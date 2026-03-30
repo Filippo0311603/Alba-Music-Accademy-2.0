@@ -1,7 +1,12 @@
 // API endpoint configuration
-// This will be injected at build time by Vercel or at runtime by the environment
+// In production on Vercel we can use same-origin /api with rewrites.
+const rawApiUrl = String(import.meta.env.VITE_API_URL || '').trim();
+const runtimeFallbackApiUrl =
+  typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8787'
+    : '';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
+export const API_URL = (rawApiUrl || runtimeFallbackApiUrl).replace(/\/$/, '');
 
 export async function apiCall(
   endpoint: string,
