@@ -37,6 +37,10 @@ function normalizePublicAppUrl(rawValue, fallbackPort) {
 }
 
 const publicAppUrl = normalizePublicAppUrl(process.env.PUBLIC_APP_URL, port);
+const frontendAppUrl = normalizePublicAppUrl(
+  process.env.FRONTEND_APP_URL || String(process.env.ADMIN_ALLOWED_ORIGINS || '').split(',')[0],
+  port,
+);
 const reminderWindowMs = 24 * 60 * 60 * 1000;
 const smtpTimeoutMs = Number(process.env.SMTP_TIMEOUT_MS || 12000);
 const mailjetApiTimeoutMs = Number(process.env.MAILJET_API_TIMEOUT_MS || 15000);
@@ -437,11 +441,11 @@ async function sendBookingEmail({to, subject, html, text}) {
 }
 
 function buildCancelUrl(cancelToken) {
-  return `${publicAppUrl}/booking/cancel/${cancelToken}`;
+  return `${frontendAppUrl}/booking/cancel/${cancelToken}`;
 }
 
 function buildConfirmUrl(confirmToken) {
-  return `${publicAppUrl}/booking/confirm/${confirmToken}`;
+  return `${frontendAppUrl}/booking/confirm/${confirmToken}`;
 }
 
 async function confirmBookingByToken(confirmToken) {
@@ -699,7 +703,7 @@ app.post('/api/bookings', async (req, res) => {
 
 async function handleConfirmBooking(req, res) {
   const {token} = req.params;
-  return res.redirect(302, `${publicAppUrl}/booking/confirm/${token}`);
+  return res.redirect(302, `${frontendAppUrl}/booking/confirm/${token}`);
 }
 
 async function handleConfirmBookingActionApi(req, res) {
@@ -747,11 +751,12 @@ async function handleConfirmBookingActionApi(req, res) {
 
 app.get('/api/bookings/confirm/:token', handleConfirmBooking);
 app.get('/bookings/confirm/:token', handleConfirmBooking);
+app.get('/booking/confirm/:token', handleConfirmBooking);
 app.get('/api/bookings/action/confirm/:token', handleConfirmBookingActionApi);
 
 async function handleCancelBooking(req, res) {
   const {token} = req.params;
-  return res.redirect(302, `${publicAppUrl}/booking/cancel/${token}`);
+  return res.redirect(302, `${frontendAppUrl}/booking/cancel/${token}`);
 }
 
 async function handleCancelBookingActionApi(req, res) {
@@ -783,6 +788,7 @@ async function handleCancelBookingActionApi(req, res) {
 
 app.get('/api/bookings/cancel/:token', handleCancelBooking);
 app.get('/bookings/cancel/:token', handleCancelBooking);
+app.get('/booking/cancel/:token', handleCancelBooking);
 app.get('/api/bookings/action/cancel/:token', handleCancelBookingActionApi);
 
 app.post('/api/admin/auth/login', async (req, res) => {
