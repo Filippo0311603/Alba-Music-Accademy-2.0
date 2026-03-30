@@ -20,7 +20,23 @@ const dataFilePath = path.join(__dirname, 'data', 'bookings.json');
 
 const app = express();
 const port = Number(process.env.BOOKING_SERVER_PORT || 8787);
-const publicAppUrl = process.env.PUBLIC_APP_URL || `http://localhost:${port}`;
+function normalizePublicAppUrl(rawValue, fallbackPort) {
+  const fallback = `http://localhost:${fallbackPort}`;
+  const value = String(rawValue || fallback).trim();
+
+  try {
+    const parsed = new URL(value);
+    parsed.pathname = parsed.pathname.replace(/\/+$/, '');
+    if (parsed.pathname.endsWith('/api')) {
+      parsed.pathname = parsed.pathname.slice(0, -4) || '/';
+    }
+    return parsed.toString().replace(/\/$/, '');
+  } catch {
+    return fallback;
+  }
+}
+
+const publicAppUrl = normalizePublicAppUrl(process.env.PUBLIC_APP_URL, port);
 const reminderWindowMs = 24 * 60 * 60 * 1000;
 const smtpTimeoutMs = Number(process.env.SMTP_TIMEOUT_MS || 12000);
 const mailjetApiTimeoutMs = Number(process.env.MAILJET_API_TIMEOUT_MS || 15000);
@@ -681,7 +697,7 @@ app.post('/api/bookings', async (req, res) => {
   });
 });
 
-app.get('/api/bookings/confirm/:token', async (req, res) => {
+async function handleConfirmBooking(req, res) {
   const {token} = req.params;
   const outcome = await confirmBookingByToken(token);
 
@@ -702,9 +718,12 @@ app.get('/api/bookings/confirm/:token', async (req, res) => {
   }
 
   return res.status(200).send('<h1>Prenotazione confermata</h1><p>La tua prenotazione e ora attiva. Ti aspettiamo in accademia.</p>');
-});
+}
 
-app.get('/api/bookings/cancel/:token', async (req, res) => {
+app.get('/api/bookings/confirm/:token', handleConfirmBooking);
+app.get('/bookings/confirm/:token', handleConfirmBooking);
+
+async function handleCancelBooking(req, res) {
   const {token} = req.params;
   const outcome = await cancelBookingByToken(token);
 
@@ -717,7 +736,10 @@ app.get('/api/bookings/cancel/:token', async (req, res) => {
   }
 
   return res.status(200).send('<h1>Prenotazione disdetta con successo</h1><p>Lo slot e stato liberato ed e di nuovo disponibile sul sito.</p>');
-});
+}
+
+app.get('/api/bookings/cancel/:token', handleCancelBooking);
+app.get('/bookings/cancel/:token', handleCancelBooking);
 
 app.post('/api/admin/auth/login', async (req, res) => {
   try {
