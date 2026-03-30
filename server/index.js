@@ -62,6 +62,33 @@ function parseAllowedOrigins() {
 
 const allowedAdminOrigins = parseAllowedOrigins();
 
+function parseCorsAllowedOrigins() {
+  const fromEnv = String(process.env.CORS_ALLOWED_ORIGINS || process.env.ADMIN_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const defaults = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
+  ];
+
+  const origins = new Set();
+  for (const value of [...defaults, ...fromEnv]) {
+    try {
+      origins.add(new URL(value).origin);
+    } catch {
+      // Ignore invalid origins in env values.
+    }
+  }
+
+  return origins;
+}
+
+const corsAllowedOrigins = parseCorsAllowedOrigins();
+
 if (defaultAdminPassword) {
   console.warn('[admin-auth] ADMIN_PASSWORD usa il valore di default: aggiornalo prima del deploy.');
 }
@@ -78,6 +105,33 @@ app.disable('x-powered-by');
 if (isProduction) {
   app.set('trust proxy', 1);
 }
+
+app.use((req, res, next) => {
+  const origin = String(req.get('origin') || '').trim();
+
+  if (origin) {
+    let normalizedOrigin = '';
+    try {
+      normalizedOrigin = new URL(origin).origin;
+    } catch {
+      normalizedOrigin = '';
+    }
+
+    if (normalizedOrigin && corsAllowedOrigins.has(normalizedOrigin)) {
+      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Max-Age', '86400');
+    }
+  }
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
+  next();
+});
 
 app.use(express.json({limit: '32kb'}));
 app.use((req, res, next) => {
