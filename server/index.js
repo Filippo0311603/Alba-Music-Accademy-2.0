@@ -23,6 +23,10 @@ const port = Number(process.env.BOOKING_SERVER_PORT || 8787);
 const publicAppUrl = process.env.PUBLIC_APP_URL || `http://localhost:${port}`;
 const reminderWindowMs = 24 * 60 * 60 * 1000;
 const smtpTimeoutMs = Number(process.env.SMTP_TIMEOUT_MS || 12000);
+const smtpFallbackPorts = String(process.env.SMTP_FALLBACK_PORTS || '587,465,2525')
+  .split(',')
+  .map((value) => Number(value.trim()))
+  .filter((value) => Number.isFinite(value) && value > 0);
 const adminUsername = process.env.ADMIN_USERNAME || 'admin';
 const adminPassword = process.env.ADMIN_PASSWORD || 'change-me-now';
 const sessionSecret = process.env.ADMIN_SESSION_SECRET || crypto.randomBytes(48).toString('hex');
@@ -281,55 +285,88 @@ async function getMailer() {
     const smtpPort = Number(process.env.SMTP_PORT || 587);
 
     if (host && user && pass) {
-      return nodemailer.createTransport({
+      return {
+        kind: 'smtp',
         host,
-        port: smtpPort,
-        secure: smtpPort === 465,
-        auth: {user, pass},
-        connectionTimeout: smtpTimeoutMs,
-        greetingTimeout: smtpTimeoutMs,
-        socketTimeout: smtpTimeoutMs,
-      });
+        user,
+        pass,
+        ports: [smtpPort, ...smtpFallbackPorts.filter((value) => value !== smtpPort)],
+      };
     }
 
     const testAccount = await nodemailer.createTestAccount();
-    return nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-      connectionTimeout: smtpTimeoutMs,
-      greetingTimeout: smtpTimeoutMs,
-      socketTimeout: smtpTimeoutMs,
-    });
+    return {
+      kind: 'ethereal',
+      user: testAccount.user,
+      pass: testAccount.pass,
+    };
   })();
 
   return mailTransporterPromise;
 }
 
 async function sendBookingEmail({to, subject, html, text}) {
-  const transporter = await getMailer();
+  const mailer = await getMailer();
   const from = process.env.MAIL_FROM || 'Alba Music Academy <no-reply@albamusic.local>';
-  const info = await Promise.race([
-    transporter.sendMail({
-      from,
-      to,
-      subject,
-      html,
-      text,
-    }),
-    new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(`smtp timeout after ${smtpTimeoutMs}ms`)), smtpTimeoutMs);
-    }),
-  ]);
+  const mailPayload = {from, to, subject, html, text};
 
-  const preview = nodemailer.getTestMessageUrl(info);
-  if (preview) {
-    console.log(`[mail-preview] ${preview}`);
+  if (mailer.kind === 'ethereal') {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: mailer.user,
+        pass: mailer.pass,
+      },
+      connectionTimeout: smtpTimeoutMs,
+      greetingTimeout: smtpTimeoutMs,
+      socketTimeout: smtpTimeoutMs,
+    });
+
+    const info = await transporter.sendMail(mailPayload);
+    const preview = nodemailer.getTestMessageUrl(info);
+    if (preview) {
+      console.log(`[mail-preview] ${preview}`);
+    }
+    return;
   }
+
+  let lastError = null;
+  for (const portOption of mailer.ports) {
+    const transporter = nodemailer.createTransport({
+      host: mailer.host,
+      port: portOption,
+      secure: portOption === 465,
+      requireTLS: portOption !== 465,
+      auth: {user: mailer.user, pass: mailer.pass},
+      connectionTimeout: smtpTimeoutMs,
+      greetingTimeout: smtpTimeoutMs,
+      socketTimeout: smtpTimeoutMs,
+      tls: {
+        minVersion: 'TLSv1.2',
+      },
+    });
+
+    try {
+      const info = await transporter.sendMail(mailPayload);
+      const preview = nodemailer.getTestMessageUrl(info);
+      if (preview) {
+        console.log(`[mail-preview] ${preview}`);
+      }
+      return;
+    } catch (error) {
+      lastError = error;
+      console.error(`[smtp] send failed on port ${portOption}`, {
+        code: error?.code,
+        responseCode: error?.responseCode,
+        command: error?.command,
+        message: error?.message,
+      });
+    }
+  }
+
+  throw lastError || new Error('smtp send failed on all configured ports');
 }
 
 function buildCancelUrl(cancelToken) {
