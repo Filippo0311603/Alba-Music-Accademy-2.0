@@ -10,11 +10,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, '.'),
     },
   },
-  define: {
-    'import.meta.env.VITE_API_URL': JSON.stringify(
-      process.env.VITE_API_URL || 'http://localhost:8787'
-    ),
-  },
   server: {
     hmr: process.env.DISABLE_HMR !== 'true',
     proxy: {
