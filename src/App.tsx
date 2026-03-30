@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import academyLogo from './assets/logo/logo_accademia.png';
 import { 
   Music, 
   Users, 
@@ -17,16 +18,28 @@ import {
 import BookingCalendar from './components/BookingCalendar';
 
 export default function App() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-dark-bg selection:bg-brand-red selection:text-white">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-dark-bg/80 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-brand-red rounded-lg flex items-center justify-center">
-              <Music className="text-white w-6 h-6" />
-            </div>
-            <span className="text-xl font-black tracking-tighter uppercase">Alba Music</span>
+        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'h-16' : 'h-20'}`}>
+          <div className="flex items-center min-w-0">
+            <a href="#" className="inline-flex items-center">
+              <img
+                src={academyLogo}
+                alt="Logo Alba Music Academy"
+                className={`w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-all duration-300 ${isScrolled ? 'h-8 md:h-9 max-w-[120px] md:max-w-[180px]' : 'h-9 md:h-11 max-w-[140px] md:max-w-[220px]'}`}
+              />
+            </a>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
@@ -205,11 +218,12 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-24">
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-8">
-                <div className="w-10 h-10 bg-brand-red rounded-lg flex items-center justify-center">
-                  <Music className="text-white w-6 h-6" />
-                </div>
-                <span className="text-xl font-black tracking-tighter uppercase">Alba Music</span>
+              <div className="flex items-center mb-8 min-w-0">
+                <img
+                  src={academyLogo}
+                  alt="Logo Alba Music Academy"
+                  className="h-14 md:h-16 w-auto max-w-[240px] object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"
+                />
               </div>
               <p className="text-white/40 max-w-sm mb-8">
                 La tua accademia di musica nel cuore della città. Formazione professionale, sale prove e workshop con i migliori artisti.

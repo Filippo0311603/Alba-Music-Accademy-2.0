@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: alba-music-backend
+    runtime: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "npm run server"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BOOKING_SERVER_PORT
+        value: "3000"
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: ADMIN_SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_ALLOWED_ORIGINS
+        value: https://alba-music-academy.vercel.app
+      - key: SMTP_HOST
+        value: in-v3.mailjet.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        fromFile: mailjet_api_key
+      - key: SMTP_PASS
+        fromFile: mailjet_secret_key
+      - key: MAIL_FROM
+        value: Alba Music Academy <filippoleotta06@gmail.com>
+      - key: PUBLIC_APP_URL
+        value: https://alba-music-backend.onrender.com
