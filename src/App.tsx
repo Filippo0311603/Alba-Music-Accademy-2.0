@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Music, Users, Mic2, Menu, X } from 'lucide-react';
+import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Users, Mic2, Menu, X } from 'lucide-react';
 import academyLogo from './assets/logo/logo_accademia.png';
 
 import { AuthProvider, useAuth } from './lib/auth-context';
@@ -96,13 +96,13 @@ function HomePage() {
     <div className="min-h-screen bg-dark-bg selection:bg-brand-red selection:text-white">
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-dark-bg/80 backdrop-blur-md border-b border-white/5">
-        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'h-16' : 'h-20'}`}>
+        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'h-24 md:h-28' : 'h-28 md:h-36'}`}>
           <div className="flex items-center min-w-0">
             <a href="/" className="inline-flex items-center">
               <img
                 src={academyLogo}
                 alt="Logo Alba Music Academy"
-                className={`w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-all duration-300 ${isScrolled ? 'h-8 md:h-9 max-w-[120px] md:max-w-[180px]' : 'h-9 md:h-11 max-w-[140px] md:max-w-[220px]'}`}
+                className={`w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-all duration-300 ${isScrolled ? 'h-14 md:h-20 max-w-[220px] md:max-w-[360px]' : 'h-20 md:h-28 max-w-[300px] md:max-w-[520px]'}`}
               />
             </a>
           </div>
@@ -223,7 +223,7 @@ function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center pt-20 overflow-hidden">
+      <section className="relative h-screen flex items-center pt-28 md:pt-36 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&q=80&w=2070" 
@@ -428,11 +428,12 @@ function HomePage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-24">        
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-8">
-                <div className="w-10 h-10 bg-brand-red rounded-lg flex items-center justify-center">
-                  <Music className="text-white w-6 h-6" />
-                </div>
-                <span className="text-xl font-black tracking-tighter uppercase">Alba Music</span>
+              <div className="mb-8">
+                <img
+                  src={academyLogo}
+                  alt="Logo Alba Music Academy"
+                  className="w-auto h-16 sm:h-20 md:h-24 max-w-[280px] sm:max-w-[340px] md:max-w-[420px] object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
+                />
               </div>
               <p className="text-white/40 max-w-sm mb-8">
                 La tua accademia di musica nel cuore della città. Formazione professionale, sale prove e workshop con i migliori artisti.
