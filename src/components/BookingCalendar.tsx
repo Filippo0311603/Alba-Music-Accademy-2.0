@@ -17,8 +17,9 @@ export default function BookingCalendar() {
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{type: 'success' | 'error' | 'warning'; message: string} | null>(null);
-  const [confirmationPopup, setConfirmationPopup] = useState<{title: string; message: string} | null>(null);
-
+  const [confirmationPopup, setConfirmationPopup] = useState<{title: string; message: string} | null>(null);   const [formData, setFormData] = useState({
+     notes: '',
+   });
   const times = [
     "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
   ];
@@ -89,8 +90,7 @@ export default function BookingCalendar() {
           ? `La richiesta e stata salvata, ma non siamo riusciti a inviare la email a ${destinationEmail}. Riprova tra poco o contatta l'accademia.`
           : `Per completare la prenotazione devi cliccare il bottone "Conferma prenotazione" nella email inviata a ${destinationEmail}.`,
       });
-
-      setSelectedTime(null);
+       setFormData({notes: ''});      setSelectedTime(null);
       await loadBookedTimes();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore imprevisto durante la prenotazione.';
@@ -207,10 +207,28 @@ export default function BookingCalendar() {
             ))}
           </div>
 
-          <div className="mb-6 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75">
-            {isAuthenticated
-              ? `Prenotazione associata al tuo account: ${user?.email || 'utente loggato'}`
-              : 'Accedi o registrati per poter prenotare la sala prove.'}
+          <div className="space-y-3 mb-6">
+            <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75">
+              <p className="font-bold mb-2">I tuoi dati di prenotazione:</p>
+              <div className="space-y-2 text-xs">
+                <p>Nome: <span className="text-white font-bold">{user?.fullName || 'Non disponibile'}</span></p>
+                <p>Email: <span className="text-white font-bold">{user?.email || 'Non disponibile'}</span></p>
+                <p>Telefono: <span className="text-white font-bold">{user?.phone || 'Non disponibile'}</span></p>
+              </div>
+              <p className="text-white/50 mt-3 text-xs">Se vuoi modificare questi dati, vai al tuo Profilo.</p>
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">Note (opzionali)</label>
+              <textarea
+                value={formData.notes}
+                onChange={(event) => onFormChange('notes', event.target.value)}
+                placeholder="Aggiungi note per la prenotazione..."
+                rows={3}
+                className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-brand-red resize-none"
+                disabled={!isAuthenticated || isSubmitting}
+              />
+            </div>
           </div>
 
           {feedback && (

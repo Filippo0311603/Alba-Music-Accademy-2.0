@@ -151,21 +151,104 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Booking Section */}
-      <section id="booking" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-5xl md:text-6xl font-black uppercase mb-4">Prenota una Lezione</h2>
-            <p className="text-xl text-white/60 max-w-2xl mx-auto">
-              Seleziona il giorno e l'orario che preferisci. Riceverai una email di conferma e potrai gestire la tua prenotazione dal tuo profilo.
+      {/* Stats Section */}
+      <section className="py-24 bg-dark-bg relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
+            {[
+              { label: "Anni di esperienza", value: "20", icon: Music },        
+              { label: "Docenti professionisti", value: "45", icon: Users },    
+              { label: "Studenti formati", value: "12.000", icon: BookOpen },   
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="glass-card flex flex-col items-start gap-4 group hover:border-brand-red/50 transition-colors"
+              >
+                <span className="text-5xl font-black text-white group-hover:text-brand-red transition-colors">{stat.value}</span>
+                <span className="text-sm text-white/40 uppercase tracking-widest font-bold">{stat.label}</span>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight uppercase">
+              Benvenuti in Accademia: <br />
+              <span className="text-white/40 italic">l'identità, il metodo, la visione.</span>
+            </h2>
+            <div className="w-20 h-1 bg-brand-red mx-auto mb-12" />
+            <p className="text-xl text-white/60 leading-relaxed">
+              Alba Music Academy è una scuola di riferimento, apprezzata in Italia e all'estero da chi vuole fare Musica. Il nostro metodo si basa sulla pratica costante e sul confronto con i migliori professionisti del settore.
             </p>
-          </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Teachers Section */}
+      <section className="py-24 bg-dark-bg">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-red/30 text-brand-red text-xs font-bold uppercase tracking-wider mb-4">
+                <Users className="w-3 h-3" /> Eccellenza
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black uppercase">I nostri <span className="text-brand-red">Docenti</span></h2>
+            </div>
+            <p className="text-white/40 max-w-xs text-sm">
+              Impara dai migliori professionisti del panorama musicale internazionale.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              { name: "Marco Rossi", role: "Chitarra Elettrica", img: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=800" },
+              { name: "Elena Bianchi", role: "Canto Moderno", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800" },
+              { name: "Luca Verdi", role: "Batteria & Percussioni", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800" },
+              { name: "Sofia Neri", role: "Pianoforte Classico", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=800" },
+            ].map((teacher, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative overflow-hidden rounded-2xl aspect-[3/4]"
+              >
+                <img
+                  src={teacher.img}
+                  alt={teacher.name}
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-dark-bg via-transparent to-transparent opacity-80" />
+                <div className="absolute bottom-0 left-0 p-6">
+                  <h3 className="text-xl font-bold mb-1">{teacher.name}</h3>    
+                  <p className="text-brand-red text-xs font-bold uppercase tracking-wider">{teacher.role}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Booking Section */}
+      <section id="booking" className="py-24 bg-dark-card/30">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-red/30 text-brand-red text-xs font-bold uppercase tracking-wider mb-4">
+                <Mic2 className="w-3 h-3" /> Prenotazioni
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black uppercase">Prenota la tua <span className="text-brand-red">Sala Prove</span></h2>
+            </div>
+            <p className="text-white/40 max-w-xs text-sm">
+              Scegli il giorno e l'ora che preferisci. Le nostre sale sono equipaggiate con strumentazione professionale di alta gamma.
+            </p>
+          </div>
+
           <BookingCalendar />
         </div>
       </section>
@@ -197,12 +280,59 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Admin Link */}
-      <div className="text-center py-8 border-t border-white/5">
-        <a href="/admin" className="text-white/50 hover:text-brand-red text-sm transition-colors">
-          Admin Panel
-        </a>
-      </div>
+      {/* Footer */}
+      <footer className="bg-dark-bg pt-24 pb-12 border-t border-white/5">       
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-24">        
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center gap-2 mb-8">
+                <div className="w-10 h-10 bg-brand-red rounded-lg flex items-center justify-center">
+                  <Music className="text-white w-6 h-6" />
+                </div>
+                <span className="text-xl font-black tracking-tighter uppercase">Alba Music</span>
+              </div>
+              <p className="text-white/40 max-w-sm mb-8">
+                La tua accademia di musica nel cuore della città. Formazione professionale, sale prove e workshop con i migliori artisti.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-brand-red hover:border-brand-red transition-all">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-brand-red hover:border-brand-red transition-all">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-brand-red hover:border-brand-red transition-all">
+                  <Youtube className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-8 uppercase tracking-widest text-sm">Contatti</h4>
+              <ul className="space-y-4 text-white/60 text-sm">
+                <li className="flex items-center gap-3"><MapPin className="w-4 h-4 text-brand-red" /> Via delle Note, 12 - Bologna</li>
+                <li className="flex items-center gap-3"><Phone className="w-4 h-4 text-brand-red" /> +39 051 1234567</li>
+                <li className="flex items-center gap-3"><Mail className="w-4 h-4 text-brand-red" /> info@albamusic.it</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-8 uppercase tracking-widest text-sm">Link Rapidi</h4>
+              <ul className="space-y-4 text-white/60 text-sm">
+                <li><a href="#" className="hover:text-brand-red transition-colors">Corsi di Strumento</a></li>
+                <li><a href="#" className="hover:text-brand-red transition-colors">Masterclass</a></li>
+                <li><a href="#" className="hover:text-brand-red transition-colors">Lavora con noi</a></li>
+                <li><a href="#" className="hover:text-brand-red transition-colors">Privacy Policy</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-white/20 font-medium uppercase tracking-widest">
+            <p>© 2026 Alba Music Academy. Tutti i diritti riservati.</p>        
+            <p>Made with ❤️ for Music</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
