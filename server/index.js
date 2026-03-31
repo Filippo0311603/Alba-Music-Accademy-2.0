@@ -14,6 +14,7 @@ import {
   updateBookingStatus,
   findBookingByConfirmToken,
   findBookingByCancelToken,
+  getBookingById,
   getBookingsNeedingReminder,
   updateReminderSent,
   getUserByEmail,
@@ -172,6 +173,7 @@ app.use((req, res, next) => {
     if (normalizedOrigin && corsAllowedOrigins.has(normalizedOrigin)) {
       res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
       res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       res.setHeader('Access-Control-Max-Age', '86400');
@@ -1011,12 +1013,89 @@ app.get('/api/admin/bookings', requireAdminSession, async (req, res) => {
   }
 });
 
+app.get('/api/admin/slots', requireAdminSession, async (req, res) => {
+  try {
+    const date = String(req.query.date || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({error: 'date must be in YYYY-MM-DD format'});
+    }
+
+    const bookings = await getBookingsByDate(date);
+    const bookedTimes = bookings
+      .map((booking) => normalizeTimeLabel(booking.time))
+      .filter(Boolean);
+
+    return res.json({bookedTimes});
+  } catch (error) {
+    console.error('[api] GET /api/admin/slots error', error);
+    return res.status(500).json({error: 'Internal server error'});
+  }
+});
+
+app.post('/api/admin/bookings/manual', requireAllowedAdminOrigin, requireAdminSession, async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const firstName = String(payload.firstName || '').trim();
+    const lastName = String(payload.lastName || '').trim();
+    const phone = String(payload.phone || '').trim();
+    const date = String(payload.date || '').trim();
+    const time = String(payload.time || '').trim();
+    const notes = String(payload.notes || '').trim();
+
+    if (!firstName || !lastName || !phone || !date || !time) {
+      return res.status(400).json({error: 'Nome, cognome, telefono, data e orario sono obbligatori'});
+    }
+
+    if (!isValidPhone(phone)) {
+      return res.status(400).json({error: 'Numero di telefono non valido'});
+    }
+
+    const validationError = validateBookingInput({date, time});
+    if (validationError) {
+      return res.status(400).json({error: validationError});
+    }
+
+    const existingBookings = await getBookingsByDate(date);
+    const selectedTime = normalizeTimeLabel(time);
+    const conflict = existingBookings.find((booking) => normalizeTimeLabel(booking.time) === selectedTime);
+
+    if (conflict) {
+      return res.status(409).json({error: 'slot is already booked'});
+    }
+
+    const fullName = `${firstName} ${lastName}`.trim();
+    const placeholderEmail = `manual-${Date.now()}@alba.local`;
+    const manualBooking = await createBooking({
+      user_id: null,
+      email: placeholderEmail,
+      full_name: fullName,
+      phone,
+      notes: notes || 'Prenotazione inserita manualmente dalla segreteria',
+      date,
+      time: selectedTime,
+      confirm_token: crypto.randomBytes(24).toString('hex'),
+      cancel_token: crypto.randomBytes(24).toString('hex'),
+      status: 'confirmed',
+      created_at: new Date().toISOString(),
+      confirmed_at: new Date().toISOString(),
+    });
+
+    return res.status(201).json({
+      message: 'Prenotazione inserita con successo',
+      booking: serializeBookingForAdmin(manualBooking),
+    });
+  } catch (error) {
+    console.error('[api] POST /api/admin/bookings/manual error', error);
+    return res.status(500).json({error: 'Internal server error'});
+  }
+});
+
 app.post('/api/admin/bookings/:id/cancel', requireAllowedAdminOrigin, requireAdminSession, async (req, res) => {
   try {
     const {id} = req.params;
-    const booking = await findBookingByConfirmToken(id) || await findBookingByCancelToken(id);
+    const booking = await getBookingById(id);
 
-    if (!booking || booking.id !== id) {
+    if (!booking) {
       return res.status(404).json({error: 'booking not found'});
     }
 

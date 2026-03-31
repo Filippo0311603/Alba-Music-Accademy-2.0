@@ -119,6 +119,20 @@ export async function findBookingByCancelToken(token) {
 }
 
 /**
+ * Finds booking by id
+ */
+export async function getBookingById(bookingId) {
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('id', bookingId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return data || null;
+}
+
+/**
  * Finds bookings needing reminder (confirmed, no reminder sent, within 24h of booking)
  */
 export async function getBookingsNeedingReminder() {

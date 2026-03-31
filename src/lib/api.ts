@@ -103,21 +103,39 @@ export const adminAPI = {
   login: (username: string, password: string) => 
     apiCall('/api/admin/auth/login', {
       method: 'POST',
+      credentials: 'include',
       body: JSON.stringify({ username, password }),
     }),
 
-  getSession: () => apiCall('/api/admin/auth/me'),
+  getSession: () => apiCall('/api/admin/auth/me', { credentials: 'include' }),
 
-  logout: () => apiCall('/api/admin/auth/logout', { method: 'POST' }),
+  logout: () => apiCall('/api/admin/auth/logout', { method: 'POST', credentials: 'include' }),
 
-  getBookings: () => apiCall('/api/admin/bookings'),
+  getBookings: () => apiCall('/api/admin/bookings', { credentials: 'include' }),
+
+  getSlots: (date: string) => apiCall(`/api/admin/slots?date=${date}`, { credentials: 'include' }),
+
+  createManualBooking: (data: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    date: string;
+    time: string;
+    notes?: string;
+  }) =>
+    apiCall('/api/admin/bookings/manual', {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(data),
+    }),
 
   cancelBooking: (id: string) => 
     apiCall(`/api/admin/bookings/${id}/cancel`, {
       method: 'POST',
+      credentials: 'include',
     }),
 
-  runReminders: () => apiCall('/api/admin/reminders/run', { method: 'POST' }),
+  runReminders: () => apiCall('/api/admin/reminders/run', { method: 'POST', credentials: 'include' }),
 
-  testSmtp: () => apiCall('/api/admin/smtp/test', { method: 'POST' }),
+  testSmtp: () => apiCall('/api/admin/smtp/test', { method: 'POST', credentials: 'include' }),
 };
