@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import { motion } from 'motion/react';
 import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Users, Mic2, Menu, X } from 'lucide-react';
 import academyLogo from './assets/logo/logo_accademia.png';
+import heroHomepageImage from './assets/pages/home/hero-homepage.jpg';
 
 import { AuthProvider, useAuth } from './lib/auth-context';
 import BookingCalendar from './components/BookingCalendar';
@@ -143,13 +144,13 @@ function HomePage() {
       />
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-dark-bg/80 backdrop-blur-md border-b border-white/5">
-        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'h-24 md:h-28' : 'h-28 md:h-36'}`}>
+        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'h-16 md:h-20' : 'h-20 md:h-24'}`}>
           <div className="flex items-center min-w-0">
             <a href="/" className="inline-flex items-center">
               <img
                 src={academyLogo}
                 alt="Logo Alba Music Academy"
-                className={`w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-all duration-300 ${isScrolled ? 'h-14 md:h-20 max-w-[220px] md:max-w-[360px]' : 'h-20 md:h-28 max-w-[300px] md:max-w-[520px]'}`}
+                className={`w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-all duration-300 ${isScrolled ? 'h-10 md:h-14 max-w-[170px] md:max-w-[280px]' : 'h-14 md:h-20 max-w-[230px] md:max-w-[360px]'}`}
               />
             </a>
           </div>
@@ -398,13 +399,12 @@ function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center pt-36 md:pt-36 overflow-hidden">
+      <section className="relative min-h-[100svh] md:h-screen flex items-start md:items-center pt-40 md:pt-32 pb-20 md:pb-0 overflow-visible md:overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&q=80&w=2070" 
+            src={heroHomepageImage}
             alt="Music Studio" 
             className="w-full h-full object-cover opacity-30 grayscale"
-            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-dark-bg via-transparent to-transparent" />
         </div>
@@ -416,20 +416,20 @@ function HomePage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="max-w-4xl"
           >
-            <h1 className="text-6xl md:text-8xl font-black leading-[0.9] mb-8 uppercase">
-              Libera la tua <br />
-              <span className="text-brand-red">musica</span> con noi
+            <h1 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.08] md:leading-[0.95] mb-8 uppercase max-w-5xl">
+              Formazione d'eccellenza <br />
+              per le <span className="text-brand-red">arti dello spettacolo</span>
             </h1>
-            <p className="text-xl text-white/60 max-w-xl mb-12">
+            <p className="text-base sm:text-lg md:text-xl text-white/60 max-w-xl mb-10 md:mb-12">
               Da oltre 20 anni formiamo i talenti del domani. Unisciti alla nostra accademia e trasforma la tua passione in professione.
             </p>
             
-            <div className="flex flex-wrap gap-6 items-center">
+            <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
               <button 
                 onClick={() => navigate('/signup')}
-                className="w-40 h-40 rounded-full bg-brand-red flex flex-col items-center justify-center gap-2 font-bold hover:scale-110 transition-transform group"
+                className="w-24 h-24 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-full bg-brand-red flex flex-col items-center justify-center gap-1 sm:gap-2 font-bold text-[11px] sm:text-sm md:text-base hover:scale-105 md:hover:scale-110 transition-transform group"
               >
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" />
                 <span>Scopri di più</span>
               </button>
             </div>

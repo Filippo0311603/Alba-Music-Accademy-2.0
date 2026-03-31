@@ -62,13 +62,13 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
   return (
     <div className="min-h-screen bg-dark-bg text-white selection:bg-brand-red selection:text-white">
       <nav className="fixed top-0 w-full z-50 bg-dark-bg/80 backdrop-blur-md border-b border-white/5">
-        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'h-24 md:h-28' : 'h-28 md:h-36'}`}>
+        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'h-16 md:h-20' : 'h-20 md:h-24'}`}>
           <div className="flex items-center min-w-0">
             <a href="/" className="inline-flex items-center">
               <img
                 src={academyLogo}
                 alt="Logo Alba Music Academy"
-                className={`w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-all duration-300 ${isScrolled ? 'h-14 md:h-20 max-w-[220px] md:max-w-[360px]' : 'h-20 md:h-28 max-w-[300px] md:max-w-[520px]'}`}
+                className={`w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-all duration-300 ${isScrolled ? 'h-10 md:h-14 max-w-[170px] md:max-w-[280px]' : 'h-14 md:h-20 max-w-[230px] md:max-w-[360px]'}`}
               />
             </a>
           </div>
@@ -178,7 +178,7 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
 
         {/* MENU MOBILE */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-white/10 bg-dark-bg/95 backdrop-blur-md max-h-[calc(100vh-80px)] overflow-y-auto">
+          <div className="md:hidden border-t border-white/10 bg-dark-bg/95 backdrop-blur-md max-h-[calc(100vh-64px)] overflow-y-auto">
             <div className="px-6 py-4 flex flex-col gap-3">
               
               {/* ACCADEMIA GROUP MOBILE */}
@@ -278,7 +278,7 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
         )}
       </nav>
 
-      <main className="pt-28 md:pt-36">{children}</main>
+      <main className="pt-20 md:pt-24">{children}</main>
 
       <footer className="bg-dark-bg pt-24 pb-12 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6">

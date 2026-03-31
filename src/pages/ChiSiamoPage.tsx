@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Target, Heart, Award, Sparkles, ArrowRight } from 'lucide-react';
 import SiteLayout from '../components/SiteLayout';
 import SeoMeta from '../components/SeoMeta';
+import sectionUnaFamigliaImage from '../assets/pages/chi-siamo/sezione-una-famiglia.webp';
 
 // Array per la sezione delle bolle fluttuanti
 const floatingRoles = [
@@ -173,10 +174,9 @@ export default function ChiSiamoPage() {
           <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
             <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl">
               <img
-                src="https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&q=80&w=1200"
+                src={sectionUnaFamigliaImage}
                 alt="Visione Accademia"
                 className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"
-                referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/80 via-transparent to-transparent pointer-events-none" />
             </div>

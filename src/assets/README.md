@@ -5,13 +5,14 @@ Questa cartella contiene tutte le risorse multimediali del sito.
 ## Struttura
 
 - logo: loghi ufficiali dell'accademia
-- academy/hero: immagini principali della homepage (hero)
-- academy/spaces: foto sale prove, aule, reception
-- academy/gallery: foto generiche della scuola e ambienti
-- teachers/portraits: foto ritratto docenti (verticali)
-- teachers/lessons: foto docenti durante lezioni o performance
-- teachers/social: eventuali foto quadrate per card/social
-- brand/icons: icone custom del brand
+- pages: immagini organizzate per pagina (home, chi-siamo, la-sede, corsi-musica, corsi-cinema, auth, profile, admin, booking-actions)
+
+Legacy (deprecate):
+- academy/*
+- teachers/*
+- brand/*
+
+Queste cartelle legacy non sono piu utilizzate dal codice corrente.
 
 ## Convenzioni Nome File
 
@@ -32,3 +33,7 @@ Esempi:
 ## Note Operative
 
 Quando carichi nuovi file, mantieni questa struttura. Nei prossimi passaggi collegheremo queste immagini direttamente nelle sezioni del sito.
+
+Per la nuova organizzazione per-pagina, usa anche:
+- src/assets/pages/README.md
+- src/assets/pages/ASSET-MAP.md
