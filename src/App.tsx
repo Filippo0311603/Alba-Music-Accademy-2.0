@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Music, Users, Mic2 } from 'lucide-react';
+import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Music, Users, Mic2, Menu, X } from 'lucide-react';
 import academyLogo from './assets/logo/logo_accademia.png';
 
 import { AuthProvider, useAuth } from './lib/auth-context';
@@ -18,6 +18,7 @@ import BookingActionPage from './pages/BookingActionPage';
 
 function HomePage() {
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const welcomeAnimatedWords = [
@@ -59,6 +60,13 @@ function HomePage() {
   ];
   const welcomeTitleLineOneWords = ["Benvenuti", "in", "Accademia:"];
   const welcomeTitleLineTwoWords = ["l'identità,", "il", "metodo,", "la", "visione."];
+  const navItems = [
+    { label: 'Accademia', href: '#accademia' },
+    { label: 'Docenti', href: '#docenti' },
+    { label: 'Corsi', href: '#accademia' },
+    { label: 'Workshop', href: '#docenti' },
+    { label: 'Sala Prove', href: '#booking' },
+  ];
 
   React.useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 24);
@@ -67,8 +75,20 @@ function HomePage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  React.useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   const handleLogout = async () => {
     await logout();
+    setIsMobileMenuOpen(false);
     navigate('/');
   };
 
@@ -88,14 +108,14 @@ function HomePage() {
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="/" className="nav-link">Accademia <ChevronDown className="w-4 h-4" /></a>
-            <a href="/" className="nav-link">Docenti</a>
-            <a href="/" className="nav-link">Corsi <ChevronDown className="w-4 h-4" /></a>
-            <a href="/" className="nav-link">Workshop <ChevronDown className="w-4 h-4" /></a>
+            <a href="#accademia" className="nav-link">Accademia <ChevronDown className="w-4 h-4" /></a>
+            <a href="#docenti" className="nav-link">Docenti</a>
+            <a href="#accademia" className="nav-link">Corsi <ChevronDown className="w-4 h-4" /></a>
+            <a href="#docenti" className="nav-link">Workshop <ChevronDown className="w-4 h-4" /></a>
             <a href="#booking" className="nav-link">Sala Prove</a>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
                 <button
@@ -129,7 +149,77 @@ function HomePage() {
               </>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg border border-white/15 bg-white/5 text-white hover:border-brand-red/50 transition-colors"
+            aria-label={isMobileMenuOpen ? 'Chiudi menu navigazione' : 'Apri menu navigazione'}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
+
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-white/10 bg-dark-bg/95 backdrop-blur-md">
+            <div className="px-6 py-4 flex flex-col gap-3">
+              {navItems.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                >
+                  {item.label}
+                </a>
+              ))}
+
+              <div className="h-px bg-white/10 my-1" />
+
+              {user ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/profile');
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                  >
+                    Profilo
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-3 py-2 rounded-lg bg-brand-red text-black font-bold text-sm hover:bg-brand-red/90 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/login');
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                  >
+                    Accedi
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/signup');
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-brand-red text-black font-bold text-sm hover:bg-brand-red/90 transition-colors"
+                  >
+                    Iscriviti
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -191,7 +281,7 @@ function HomePage() {
       </section>
 
       {/* Welcome Section */}
-      <section className="py-24 bg-dark-bg relative z-10">
+      <section id="accademia" className="py-24 bg-dark-bg relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-4xl mx-auto">
             <motion.h2
@@ -268,7 +358,7 @@ function HomePage() {
       </section>
 
       {/* Teachers Section */}
-      <section className="py-24 bg-dark-bg">
+      <section id="docenti" className="py-24 bg-dark-bg">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
             <div className="max-w-2xl">
