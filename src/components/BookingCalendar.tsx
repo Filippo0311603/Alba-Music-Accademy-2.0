@@ -208,21 +208,11 @@ export default function BookingCalendar() {
           </div>
 
           <div className="space-y-3 mb-6">
-            <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75">
-              <p className="font-bold mb-2">I tuoi dati di prenotazione:</p>
-              <div className="space-y-2 text-xs">
-                <p>Nome: <span className="text-white font-bold">{user?.fullName || 'Non disponibile'}</span></p>
-                <p>Email: <span className="text-white font-bold">{user?.email || 'Non disponibile'}</span></p>
-                <p>Telefono: <span className="text-white font-bold">{user?.phone || 'Non disponibile'}</span></p>
-              </div>
-              <p className="text-white/50 mt-3 text-xs">Se vuoi modificare questi dati, vai al tuo Profilo.</p>
-            </div>
-
             <div>
               <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">Note (opzionali)</label>
               <textarea
                 value={formData.notes}
-                onChange={(event) => onFormChange('notes', event.target.value)}
+                onChange={(event) => setFormData({ notes: event.target.value })}
                 placeholder="Aggiungi note per la prenotazione..."
                 rows={3}
                 className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-brand-red resize-none"

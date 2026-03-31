@@ -253,33 +253,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-6 border-t border-white/5">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Phone, label: 'Supporto 24/7', desc: 'Assistenza sempre disponibile' },
-              { icon: Mail, label: 'Email Automata', desc: 'Conferme e promemoria' },
-              { icon: MapPin, label: 'Ubicazione', desc: 'Centro di Bologna' },
-              { icon: Music, label: 'Strumenti', desc: 'Attrezzatura professionale' },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="glass-card text-center"
-              >
-                <item.icon className="w-12 h-12 text-brand-red mx-auto mb-4" />
-                <h3 className="font-bold mb-2">{item.label}</h3>
-                <p className="text-sm text-white/60">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-dark-bg pt-24 pb-12 border-t border-white/5">       
         <div className="max-w-7xl mx-auto px-6">
