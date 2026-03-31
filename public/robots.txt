@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /profile
+Disallow: /login
+Disallow: /signup
+Disallow: /booking/
+Disallow: /api/
+
+Sitemap: https://alba-music-academy.vercel.app/sitemap.xml

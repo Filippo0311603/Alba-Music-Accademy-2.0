@@ -6,22 +6,27 @@ import academyLogo from './assets/logo/logo_accademia.png';
 
 import { AuthProvider, useAuth } from './lib/auth-context';
 import BookingCalendar from './components/BookingCalendar';
+import SeoMeta from './components/SeoMeta';
 
-// Pages
-import SignupPage from './pages/SignupPage';
-import LoginPage from './pages/LoginPage';
-import ProfilePage from './pages/ProfilePage';
-import AdminPage from './pages/AdminPage';
-import BookingActionPage from './pages/BookingActionPage';
-import MusicDepartmentPage from './pages/MusicDepartmentPage';
-import CinemaDepartmentPage from './pages/CinemaDepartmentPage';
+const SignupPage = React.lazy(() => import('./pages/SignupPage'));
+const LoginPage = React.lazy(() => import('./pages/LoginPage'));
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
+const AdminPage = React.lazy(() => import('./pages/AdminPage'));
+const BookingActionPage = React.lazy(() => import('./pages/BookingActionPage'));
+const MusicDepartmentPage = React.lazy(() => import('./pages/MusicDepartmentPage'));
+const CinemaDepartmentPage = React.lazy(() => import('./pages/CinemaDepartmentPage'));
+const ChiSiamoPage = React.lazy(() => import('./pages/ChiSiamoPage'));
+const LaSedePage = React.lazy(() => import('./pages/LaSedePage'));
 
 // ============ MAIN HOME PAGE ============
 
 function HomePage() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isMobileAcademyOpen, setIsMobileAcademyOpen] = React.useState(false);
   const [isMobileCoursesOpen, setIsMobileCoursesOpen] = React.useState(false);
+  const [isDesktopAcademyOpen, setIsDesktopAcademyOpen] = React.useState(false);
+  const desktopAcademyDropdownRef = React.useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const welcomeAnimatedWords = [
@@ -64,7 +69,6 @@ function HomePage() {
   const welcomeTitleLineOneWords = ["Benvenuti", "in", "Accademia:"];
   const welcomeTitleLineTwoWords = ["l'identità,", "il", "metodo,", "la", "visione."];
   const navItems = [
-    { label: 'Accademia', href: '#accademia' },
     { label: 'Docenti', href: '#docenti' },
     { label: 'Workshop', href: '#docenti' },
     { label: 'Sala Prove', href: '#booking' },
@@ -81,6 +85,7 @@ function HomePage() {
     const onResize = () => {
       if (window.innerWidth >= 768) {
         setIsMobileMenuOpen(false);
+        setIsMobileAcademyOpen(false);
         setIsMobileCoursesOpen(false);
       }
     };
@@ -89,15 +94,53 @@ function HomePage() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  React.useEffect(() => {
+    const onDocumentMouseDown = (event: MouseEvent) => {
+      if (
+        isDesktopAcademyOpen &&
+        desktopAcademyDropdownRef.current &&
+        !desktopAcademyDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDesktopAcademyOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', onDocumentMouseDown);
+    return () => document.removeEventListener('mousedown', onDocumentMouseDown);
+  }, [isDesktopAcademyOpen]);
+
   const handleLogout = async () => {
     await logout();
     setIsMobileMenuOpen(false);
+    setIsMobileAcademyOpen(false);
     setIsMobileCoursesOpen(false);
+    setIsDesktopAcademyOpen(false);
     navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-dark-bg selection:bg-brand-red selection:text-white">
+      <SeoMeta
+        title="Alba Music Academy | Scuola di Musica a Ladispoli (RM)"
+        description="Alba Music Academy a Ladispoli (RM): corsi di musica e cinema, workshop e prenotazione sala prove in Via delle Orchidee 13A."
+        path="/"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'MusicSchool',
+          name: 'Alba Music Academy',
+          telephone: '+39 370 149 7361',
+          email: 'albamusicacademy@gmail.com',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'Via delle Orchidee 13A',
+            postalCode: '00055',
+            addressLocality: 'Ladispoli',
+            addressRegion: 'RM',
+            addressCountry: 'IT',
+          },
+        }}
+        breadcrumbs={[{ name: 'Home', path: '/' }]}
+      />
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-dark-bg/80 backdrop-blur-md border-b border-white/5">
         <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-300 ${isScrolled ? 'h-24 md:h-28' : 'h-28 md:h-36'}`}>
@@ -112,7 +155,35 @@ function HomePage() {
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="#accademia" className="nav-link">Accademia <ChevronDown className="w-4 h-4" /></a>
+            <div className="relative" ref={desktopAcademyDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsDesktopAcademyOpen((prev) => !prev)}
+                className="nav-link"
+                aria-expanded={isDesktopAcademyOpen}
+                aria-haspopup="menu"
+              >
+                Accademia <ChevronDown className={`w-4 h-4 transition-transform ${isDesktopAcademyOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isDesktopAcademyOpen && (
+                <div className="absolute left-0 top-full mt-2 min-w-[200px] rounded-xl border border-white/10 bg-dark-bg/95 backdrop-blur-md shadow-xl p-2 transition-all duration-200 z-50">
+                  <a
+                    href="/chi-siamo"
+                    onClick={() => setIsDesktopAcademyOpen(false)}
+                    className="block rounded-lg px-3 py-2 text-sm font-bold text-white/85 hover:bg-white/5 hover:text-brand-red transition-colors"
+                  >
+                    Chi Siamo
+                  </a>
+                  <a
+                    href="/la-sede"
+                    onClick={() => setIsDesktopAcademyOpen(false)}
+                    className="block rounded-lg px-3 py-2 text-sm font-bold text-white/85 hover:bg-white/5 hover:text-brand-red transition-colors"
+                  >
+                    La Sede
+                  </a>
+                </div>
+              )}
+            </div>
             <a href="#docenti" className="nav-link">Docenti</a>
             <div className="relative group">
               <button className="nav-link">
@@ -177,6 +248,7 @@ function HomePage() {
             onClick={() => {
               setIsMobileMenuOpen((prev) => {
                 if (prev) {
+                  setIsMobileAcademyOpen(false);
                   setIsMobileCoursesOpen(false);
                 }
                 return !prev;
@@ -193,6 +265,43 @@ function HomePage() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-white/10 bg-dark-bg/95 backdrop-blur-md">
             <div className="px-6 py-4 flex flex-col gap-3">
+              <div className="rounded-lg border border-white/10 bg-white/5 p-2">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileAcademyOpen((prev) => !prev)}
+                  className="w-full px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors flex items-center justify-between"
+                  aria-expanded={isMobileAcademyOpen}
+                >
+                  <span>Accademia</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isMobileAcademyOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isMobileAcademyOpen && (
+                  <div className="mt-1 pl-2 border-l border-white/10">
+                    <a
+                      href="/chi-siamo"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsMobileAcademyOpen(false);
+                      }}
+                      className="block px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                    >
+                      Chi Siamo
+                    </a>
+                    <a
+                      href="/la-sede"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsMobileAcademyOpen(false);
+                      }}
+                      className="block px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                    >
+                      La Sede
+                    </a>
+                  </div>
+                )}
+              </div>
+
               {navItems.map((item) => (
                 <a
                   key={item.label}
@@ -502,9 +611,9 @@ function HomePage() {
             <div>
               <h4 className="font-bold mb-8 uppercase tracking-widest text-sm">Contatti</h4>
               <ul className="space-y-4 text-white/60 text-sm">
-                <li className="flex items-center gap-3"><MapPin className="w-4 h-4 text-brand-red" /> Via delle Note, 12 - Bologna</li>
-                <li className="flex items-center gap-3"><Phone className="w-4 h-4 text-brand-red" /> +39 051 1234567</li>
-                <li className="flex items-center gap-3"><Mail className="w-4 h-4 text-brand-red" /> info@albamusic.it</li>
+                <li className="flex items-center gap-3"><MapPin className="w-4 h-4 text-brand-red" /> Via delle Orchidee 13A - Ladispoli (RM)</li>
+                <li className="flex items-center gap-3"><Phone className="w-4 h-4 text-brand-red" /> +39 370 149 7361</li>
+                <li className="flex items-center gap-3"><Mail className="w-4 h-4 text-brand-red" /> albamusicacademy@gmail.com</li>
               </ul>
             </div>
 
@@ -533,17 +642,27 @@ function HomePage() {
 
 function AppContent() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/corsi/musica" element={<MusicDepartmentPage />} />
-      <Route path="/corsi/cinema" element={<CinemaDepartmentPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/admin" element={<AdminPage />} />
-      <Route path="/booking/confirm/:token" element={<BookingActionPage />} />
-      <Route path="/booking/cancel/:token" element={<BookingActionPage />} />
-    </Routes>
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen bg-dark-bg text-white flex items-center justify-center px-6">
+          <p className="text-white/60">Caricamento pagina...</p>
+        </div>
+      }
+    >
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/chi-siamo" element={<ChiSiamoPage />} />
+        <Route path="/la-sede" element={<LaSedePage />} />
+        <Route path="/corsi/musica" element={<MusicDepartmentPage />} />
+        <Route path="/corsi/cinema" element={<CinemaDepartmentPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/booking/confirm/:token" element={<BookingActionPage />} />
+        <Route path="/booking/cancel/:token" element={<BookingActionPage />} />
+      </Routes>
+    </React.Suspense>
   );
 }
 

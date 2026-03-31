@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Loader } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useAuth } from '../lib/auth-context';
+import SeoMeta from '../components/SeoMeta';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -45,76 +47,150 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-bg text-white flex items-center justify-center px-6 py-16">
-      <div className="w-full max-w-md glass-card">
-        <Link to="/" className="inline-flex items-center gap-2 text-white/60 hover:text-brand-red text-sm mb-6">
-          <ArrowLeft className="w-4 h-4" /> Torna al sito
-        </Link>
+    <div className="min-h-screen w-full flex bg-[#050505] text-white selection:bg-brand-red selection:text-black">
+      <SeoMeta
+        title="Accedi | Alba Music Academy"
+        description="Accedi al tuo profilo Alba Music Academy per gestire prenotazioni e dati personali."
+        path="/login"
+        noIndex
+      />
 
-        <h1 className="text-3xl font-black uppercase mb-2">Accedi</h1>
-        <p className="text-white/50 text-sm mb-8">Inserisci le tue credenziali per accedere al tuo profilo.</p>
+      {/* ========================================================
+          LEFT SIDE: EDITORIAL BRANDING (Hidden on Mobile)
+          ======================================================== */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-black items-end justify-start p-16 xl:p-24">
+        <img
+          src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&q=80&w=2070"
+          alt="Academy Vibe"
+          className="absolute inset-0 w-full h-full object-cover grayscale opacity-50"
+          referrerPolicy="no-referrer"
+        />
+        {/* Gradiente per scurire la parte inferiore e far leggere il testo */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="relative z-10 max-w-xl"
+        >
+          <h2 className="text-5xl xl:text-7xl font-black uppercase leading-[0.9] tracking-tight mb-6">
+            Bentornato <br />
+            <span className="text-brand-red">A Casa.</span>
+          </h2>
+          <p className="text-lg xl:text-xl text-white/50 font-medium leading-relaxed">
+            Accedi al tuo spazio personale. Prenota le sale prove, gestisci i tuoi corsi e continua il tuo percorso di crescita artistica.
+          </p>
+        </motion.div>
+      </div>
 
-        {emailConfirmed === '1' && (
-          <div className="rounded-lg bg-green-300/10 border border-green-300/40 px-3 py-2 mb-4">
-            <p className="text-green-300 text-sm">Email confermata con successo. Ora puoi accedere.</p>
-          </div>
-        )}
+      {/* ========================================================
+          RIGHT SIDE: ULTRA-MINIMAL FUNCTIONAL FORM
+          ======================================================== */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 md:px-24 xl:px-32 py-12 relative">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+          className="w-full max-w-md mx-auto lg:mx-0"
+        >
+          <Link 
+            to="/" 
+            className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-xs font-bold uppercase tracking-widest mb-16 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> 
+            Torna al sito
+          </Link>
 
-        {emailConfirmed === '0' && (
-          <div className="rounded-lg bg-red-300/10 border border-red-300/40 px-3 py-2 mb-4">
-            <p className="text-red-300 text-sm">Link di conferma non valido o scaduto. Ripeti la registrazione.</p>
-          </div>
-        )}
+          <h1 className="text-4xl md:text-5xl font-black uppercase leading-none tracking-tight mb-3 text-white">
+            Accedi
+          </h1>
+          <p className="text-white/40 text-base font-medium mb-12">
+            Inserisci le tue credenziali per continuare.
+          </p>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              placeholder="tuo.email@example.com"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm outline-none focus:border-brand-red transition-colors"
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleChange('password', e.target.value)}
-              placeholder="Inserisci la tua password"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm outline-none focus:border-brand-red transition-colors"
-              disabled={isLoading}
-            />
-          </div>
-
-          {(error || localError) && (
-            <div className="rounded-lg bg-red-300/10 border border-red-300/40 px-3 py-2">
-              <p className="text-red-300 text-sm">{error || localError}</p>
+          {/* Messaggi di Conferma / Errore Sistema */}
+          {emailConfirmed === '1' && (
+            <div className="border-l-4 border-green-500 bg-green-500/10 px-4 py-3 mb-8">
+              <p className="text-green-400 font-bold text-sm uppercase tracking-wide">Email confermata. Ora puoi accedere.</p>
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full px-4 py-3 rounded-lg bg-brand-red text-black font-extrabold uppercase text-sm hover:bg-opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-          >
-            {isLoading && <Loader className="w-4 h-4 animate-spin" />}
-            {isLoading ? 'Accesso in corso...' : 'Accedi'}
-          </button>
-        </form>
+          {emailConfirmed === '0' && (
+            <div className="border-l-4 border-red-500 bg-red-500/10 px-4 py-3 mb-8">
+              <p className="text-red-400 font-bold text-sm uppercase tracking-wide">Link non valido. Ripeti la registrazione.</p>
+            </div>
+          )}
 
-        <div className="mt-6 pt-6 border-t border-white/10">
-          <p className="text-white/60 text-sm text-center">
-            Non hai un account?{' '}
-            <Link to="/signup" className="text-brand-red hover:underline font-bold">
-              Crea account qui
-            </Link>
-          </p>
-        </div>
+          {/* IL FORM (Logica intatta, Stile stravolto) */}
+          <form className="space-y-10" onSubmit={handleSubmit}>
+            
+            {/* Input Email Stile "Material/Minimal" */}
+            <div className="relative group">
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-2 transition-colors group-focus-within:text-brand-red">
+                Indirizzo Email
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="nome@esempio.com"
+                className="w-full bg-transparent border-0 border-b-2 border-white/10 py-2 px-0 text-white text-lg font-medium placeholder-white/20 focus:ring-0 focus:border-brand-red focus:outline-none transition-colors rounded-none"
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Input Password Stile "Material/Minimal" */}
+            <div className="relative group">
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-2 transition-colors group-focus-within:text-brand-red">
+                Password
+              </label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleChange('password', e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-transparent border-0 border-b-2 border-white/10 py-2 px-0 text-white text-lg font-medium tracking-widest placeholder-white/20 focus:ring-0 focus:border-brand-red focus:outline-none transition-colors rounded-none"
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Messaggi di Errore Login */}
+            {(error || localError) && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-l-2 border-brand-red px-3 py-2">
+                <p className="text-brand-red font-bold text-sm uppercase tracking-wider">{error || localError}</p>
+              </motion.div>
+            )}
+
+            {/* Submit Button */}
+            <div className="pt-6">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-sm hover:bg-brand-red disabled:opacity-50 disabled:hover:bg-white transition-colors duration-300 flex items-center justify-center gap-3"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Elaborazione...
+                  </>
+                ) : (
+                  'Entra nel Profilo'
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Link Sign Up */}
+          <div className="mt-16">
+            <p className="text-white/40 text-sm font-medium">
+              Non hai un account?{' '}
+              <Link to="/signup" className="text-white hover:text-brand-red font-black uppercase tracking-widest ml-2 border-b border-transparent hover:border-brand-red transition-all">
+                Iscriviti ora
+              </Link>
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

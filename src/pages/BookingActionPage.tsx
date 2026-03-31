@@ -1,5 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import academyLogo from '../assets/logo/logo_accademia.png';
+import SeoMeta from '../components/SeoMeta';
 
 type ActionType = 'confirm' | 'cancel';
 
@@ -83,6 +84,12 @@ export default function BookingActionPage() {
 
   return (
     <div className="min-h-screen bg-dark-bg text-white selection:bg-brand-red selection:text-white flex items-center justify-center px-6 py-12">
+      <SeoMeta
+        title="Conferma Prenotazione | Alba Music Academy"
+        description="Pagina operativa per conferma o disdetta prenotazione Alba Music Academy."
+        path={window.location.pathname}
+        noIndex
+      />
       <div className="w-full max-w-2xl glass-card border-white/15">
         <div className="flex items-center justify-center mb-8">
           <img
