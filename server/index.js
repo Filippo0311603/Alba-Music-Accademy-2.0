@@ -263,8 +263,20 @@ function requireAllowedAdminOrigin(req, res, next) {
 
 function parseBookingStart(date, time) {
   const [year, month, day] = date.split('-').map(Number);
-  const [hours, minutes] = time.split(':').map(Number);
+  const [hours, minutes] = String(time || '').split(':').map(Number);
   return new Date(year, month - 1, day, hours, minutes, 0, 0);
+}
+
+function normalizeTimeLabel(rawTime) {
+  const value = String(rawTime || '').trim();
+  const match = value.match(/^(\d{1,2}):(\d{2})/);
+
+  if (!match) {
+    return value;
+  }
+
+  const hours = String(Number(match[1])).padStart(2, '0');
+  return `${hours}:${match[2]}`;
 }
 
 function validateBookingInput(payload) {
@@ -481,8 +493,9 @@ async function confirmBookingByToken(confirmToken) {
 
   // Check for slot conflict
   const bookings = await getBookingsByDate(booking.date);
+  const bookingTime = normalizeTimeLabel(booking.time);
   const conflict = bookings.find(
-    (b) => b.id !== booking.id && b.status === 'confirmed' && b.time === booking.time,
+    (b) => b.id !== booking.id && b.status === 'confirmed' && normalizeTimeLabel(b.time) === bookingTime,
   );
 
   if (conflict) {
@@ -767,7 +780,9 @@ app.get('/api/slots', async (req, res) => {
     }
 
     const bookings = await getBookingsByDate(date);
-    const bookedTimes = bookings.map((b) => b.time);
+    const bookedTimes = bookings
+      .map((b) => normalizeTimeLabel(b.time))
+      .filter(Boolean);
 
     res.json({bookedTimes});
   } catch (error) {
@@ -786,7 +801,8 @@ app.post('/api/bookings', requireUserAuth, async (req, res) => {
 
     // Check for time slot conflict
     const existingBookings = await getBookingsByDate(payload.date);
-    const conflict = existingBookings.find((b) => b.time === payload.time);
+    const requestedTime = normalizeTimeLabel(payload.time);
+    const conflict = existingBookings.find((b) => normalizeTimeLabel(b.time) === requestedTime);
 
     if (conflict) {
       return res.status(409).json({error: 'slot is already booked'});

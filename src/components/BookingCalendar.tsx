@@ -24,6 +24,17 @@ export default function BookingCalendar() {
     "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
   ];
 
+  const normalizeTimeLabel = (rawTime: string) => {
+    const value = String(rawTime || '').trim();
+    const match = value.match(/^(\d{1,2}):(\d{2})/);
+
+    if (!match) {
+      return value;
+    }
+
+    return `${match[1].padStart(2, '0')}:${match[2]}`;
+  };
+
   const selectedDateKey = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
 
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
@@ -40,7 +51,11 @@ export default function BookingCalendar() {
     setIsLoadingSlots(true);
     try {
       const data = await bookingAPI.getSlots(selectedDateKey);
-      setBookedTimes(Array.isArray(data.bookedTimes) ? data.bookedTimes : []);
+      setBookedTimes(
+        Array.isArray(data.bookedTimes)
+          ? data.bookedTimes.map((time: string) => normalizeTimeLabel(time)).filter(Boolean)
+          : [],
+      );
     } catch (error) {
       setBookedTimes([]);
       setFeedback({type: 'error', message: 'Errore nel caricamento disponibilita. Riprova tra poco.'});
@@ -188,7 +203,9 @@ export default function BookingCalendar() {
           <div className="grid grid-cols-3 gap-2 mb-8">
             {times.map((time) => (
               (() => {
-                const unavailable = bookedTimes.includes(time) || isPastSlot(time);
+                const isBooked = bookedTimes.includes(time);
+                const isPast = isPastSlot(time);
+                const unavailable = isBooked || isPast;
                 return (
               <button
                 key={time}
@@ -200,7 +217,7 @@ export default function BookingCalendar() {
                   unavailable && "bg-white/5 text-white/25 border-white/5 cursor-not-allowed hover:bg-white/5"
                 )}
               >
-                {time} {unavailable ? '(occupato)' : ''}
+                {time} {isBooked ? '(occupato)' : isPast ? '(passato)' : ''}
               </button>
                 );
               })()
