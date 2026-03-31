@@ -9,16 +9,19 @@ export default function SignupPage() {
 
   const [formData, setFormData] = useState({
     fullName: '',
+    phone: '',
     email: '',
     password: '',
     passwordConfirm: '',
   });
 
   const [localError, setLocalError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setLocalError('');
+    setSuccessMessage('');
     clearError();
   };
 
@@ -34,6 +37,16 @@ export default function SignupPage() {
 
     if (!formData.email.trim()) {
       setLocalError('Email è obbligatoria');
+      return;
+    }
+
+    if (!formData.phone.trim()) {
+      setLocalError('Telefono è obbligatorio');
+      return;
+    }
+
+    if (!/^\+?[0-9\s().-]{7,20}$/.test(formData.phone.trim())) {
+      setLocalError('Numero di telefono non valido');
       return;
     }
 
@@ -53,8 +66,15 @@ export default function SignupPage() {
     }
 
     try {
-      await signup(formData.email, formData.password, formData.fullName);
-      navigate('/profile');
+      const result = await signup(formData.email, formData.password, formData.fullName, formData.phone);
+      setSuccessMessage(
+        result.confirmationEmailSent
+          ? 'Registrazione completata. Controlla la tua email e conferma l account prima di accedere.'
+          : 'Registrazione completata, ma la mail di conferma non è stata inviata. Contatta la segreteria.',
+      );
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
     } catch (err) {
       // Error already set in context
     }
@@ -96,6 +116,18 @@ export default function SignupPage() {
           </div>
 
           <div>
+            <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">Telefono</label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => handleChange('phone', e.target.value)}
+              placeholder="Es. +39 333 1234567"
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm outline-none focus:border-brand-red transition-colors"
+              disabled={isLoading}
+            />
+          </div>
+
+          <div>
             <label className="block text-xs uppercase tracking-wider text-white/50 mb-2">Password</label>
             <input
               type="password"
@@ -122,6 +154,12 @@ export default function SignupPage() {
           {(error || localError) && (
             <div className="rounded-lg bg-red-300/10 border border-red-300/40 px-3 py-2">
               <p className="text-red-300 text-sm">{error || localError}</p>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="rounded-lg bg-green-300/10 border border-green-300/40 px-3 py-2">
+              <p className="text-green-300 text-sm">{successMessage}</p>
             </div>
           )}
 

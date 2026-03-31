@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { API_URL } from './api';
+import { API_URL, bookingAPI } from './api';
 
 // ============ TYPES ============
 
@@ -7,6 +7,7 @@ export type User = {
   id: string;
   email: string;
   fullName: string;
+  phone?: string | null;
 };
 
 export type AuthContextType = {
@@ -14,7 +15,7 @@ export type AuthContextType = {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
-  signup: (email: string, password: string, fullName: string) => Promise<User>;
+  signup: (email: string, password: string, fullName: string, phone: string) => Promise<{confirmationEmailSent: boolean}>;
   login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -54,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ============ AUTH FUNCTIONS ============
 
   const signup = useCallback(
-    async (email: string, password: string, fullName: string): Promise<User> => {
+    async (email: string, password: string, fullName: string, phone: string): Promise<{confirmationEmailSent: boolean}> => {
       setIsLoading(true);
       setError(null);
 
@@ -68,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: email.trim().toLowerCase(),
             password,
             fullName: fullName.trim(),
+            phone: phone.trim(),
           }),
         });
 
@@ -77,20 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const data = await response.json();
-        const newUser: User = {
-          id: data.user.id,
-          email: data.user.email,
-          fullName: data.user.fullName,
-        };
-
-        // Store user and token
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
-        if (data.token) {
-          localStorage.setItem(TOKEN_KEY, data.token);
-        }
-
-        setUser(newUser);
-        return newUser;
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(TOKEN_KEY);
+        setUser(null);
+        return {confirmationEmailSent: Boolean(data.confirmationEmailSent)};
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Signup failed';
         setError(message);
@@ -129,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: data.user.id,
           email: data.user.email,
           fullName: data.user.fullName,
+          phone: data.user.phone || null,
         };
 
         // Store user and token
@@ -159,13 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem(TOKEN_KEY);
       if (token) {
         try {
-          await fetch(`${API_URL}/api/auth/logout`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          }).catch(() => {
+          await bookingAPI.logoutUser().catch(() => {
             // Ignore logout API errors, still clear local state
           });
         } catch (err) {

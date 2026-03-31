@@ -109,6 +109,7 @@ export default function AdminBookingsPanel({onSessionExpired}: AdminBookingsPane
               <th className="py-3 pr-4">Ora</th>
               <th className="py-3 pr-4">Utente</th>
               <th className="py-3 pr-4">Email</th>
+              <th className="py-3 pr-4">Telefono</th>
               <th className="py-3 pr-4">Stato</th>
               <th className="py-3 pr-4">Conferma</th>
               <th className="py-3 pr-4">Reminder</th>
@@ -122,6 +123,7 @@ export default function AdminBookingsPanel({onSessionExpired}: AdminBookingsPane
                 <td className="py-3 pr-4">{booking.time}</td>
                 <td className="py-3 pr-4">{booking.fullName}</td>
                 <td className="py-3 pr-4">{booking.email}</td>
+                <td className="py-3 pr-4">{booking.phone || '-'}</td>
                 <td className="py-3 pr-4">
                   <span
                     className={cn(
@@ -156,7 +158,7 @@ export default function AdminBookingsPanel({onSessionExpired}: AdminBookingsPane
             ))}
             {!loading && bookings.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-6 text-white/50">
+                <td colSpan={9} className="py-6 text-white/50">
                   Nessuna prenotazione trovata.
                 </td>
               </tr>

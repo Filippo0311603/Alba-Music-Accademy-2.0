@@ -7,7 +7,22 @@ import crypto from 'node:crypto';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
-import { getAllBookings, getBookingsByDate, createBooking, updateBookingStatus, findBookingByConfirmToken, findBookingByCancelToken, getBookingsNeedingReminder, updateReminderSent, getUserByEmail, createUser, getUserBookings } from './lib/supabase-client.js';
+import {
+  getAllBookings,
+  getBookingsByDate,
+  createBooking,
+  updateBookingStatus,
+  findBookingByConfirmToken,
+  findBookingByCancelToken,
+  getBookingsNeedingReminder,
+  updateReminderSent,
+  getUserByEmail,
+  getUserById,
+  createUser,
+  getUserBookings,
+  markUserEmailVerified,
+  updateConfirmationSent,
+} from './lib/supabase-client.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,11 +67,13 @@ const adminUsername = process.env.ADMIN_USERNAME || 'admin';
 const adminPassword = process.env.ADMIN_PASSWORD || 'change-me-now';
 const sessionSecret = process.env.ADMIN_SESSION_SECRET || crypto.randomBytes(48).toString('hex');
 const sessionTtlHours = Number(process.env.ADMIN_SESSION_TTL_HOURS || 8);
-const jwtSecret = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
-const bcryptRounds = 10;
 const isProduction = process.env.NODE_ENV === 'production';
+const envJwtSecret = String(process.env.JWT_SECRET || '').trim();
+const jwtSecret = envJwtSecret || (isProduction ? '' : crypto.randomBytes(32).toString('hex'));
+const bcryptRounds = 10;
 const defaultAdminPassword = adminPassword === 'change-me-now';
 const weakSessionSecret = sessionSecret.length < 32;
+const weakJwtSecret = envJwtSecret.length > 0 && envJwtSecret.length < 32;
 
 const loginAttempts = new Map();
 const loginWindowMs = 15 * 60 * 1000;
@@ -125,8 +142,14 @@ if (weakSessionSecret) {
   console.warn('[admin-auth] ADMIN_SESSION_SECRET dovrebbe avere almeno 32 caratteri.');
 }
 
-if (isProduction && (defaultAdminPassword || weakSessionSecret)) {
-  throw new Error('Hardening check failed: imposta ADMIN_PASSWORD sicura e ADMIN_SESSION_SECRET >= 32 caratteri.');
+if (!jwtSecret) {
+  console.warn('[auth] JWT_SECRET non configurata: token login e conferma email non affidabili dopo i riavvii.');
+} else if (weakJwtSecret) {
+  console.warn('[auth] JWT_SECRET dovrebbe avere almeno 32 caratteri.');
+}
+
+if (isProduction && (defaultAdminPassword || weakSessionSecret || !jwtSecret || weakJwtSecret)) {
+  throw new Error('Hardening check failed: imposta ADMIN_PASSWORD sicura, ADMIN_SESSION_SECRET >= 32 caratteri e JWT_SECRET >= 32 caratteri.');
 }
 
 app.disable('x-powered-by');
@@ -244,16 +267,11 @@ function parseBookingStart(date, time) {
 }
 
 function validateBookingInput(payload) {
-  const required = ['fullName', 'email', 'date', 'time'];
+  const required = ['date', 'time'];
   for (const key of required) {
     if (!payload[key] || typeof payload[key] !== 'string' || !payload[key].trim()) {
       return `${key} is required`;
     }
-  }
-
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(payload.email.trim())) {
-    return 'email is invalid';
   }
 
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -275,6 +293,17 @@ function validateBookingInput(payload) {
   }
 
   return null;
+}
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phonePattern = /^\+?[0-9\s().-]{7,20}$/;
+
+function isValidEmail(value) {
+  return emailPattern.test(String(value || '').trim());
+}
+
+function isValidPhone(value) {
+  return phonePattern.test(String(value || '').trim());
 }
 
 async function getMailer() {
@@ -430,6 +459,10 @@ function buildConfirmUrl(confirmToken) {
   return `${frontendAppUrl}/booking/confirm/${confirmToken}`;
 }
 
+function buildRegistrationConfirmApiUrl(token) {
+  return `${publicAppUrl}/api/auth/confirm-email/${token}`;
+}
+
 async function confirmBookingByToken(confirmToken) {
   const booking = await findBookingByConfirmToken(confirmToken);
 
@@ -516,6 +549,103 @@ function timingSafeCompare(left, right) {
   return crypto.timingSafeEqual(a, b);
 }
 
+function toBase64Url(value) {
+  return Buffer.from(value, 'utf8').toString('base64url');
+}
+
+function signTokenPayload(encodedPayload) {
+  return crypto.createHmac('sha256', jwtSecret).update(encodedPayload).digest('base64url');
+}
+
+function generateSignedToken(payload, ttlSeconds) {
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const signedPayload = {
+    ...payload,
+    iat: nowSeconds,
+    exp: nowSeconds + ttlSeconds,
+  };
+  const encodedPayload = toBase64Url(JSON.stringify(signedPayload));
+  const signature = signTokenPayload(encodedPayload);
+  return `${encodedPayload}.${signature}`;
+}
+
+function verifySignedToken(token) {
+  const [encodedPayload, receivedSignature] = String(token || '').split('.');
+  if (!encodedPayload || !receivedSignature) {
+    return null;
+  }
+
+  const expectedSignature = signTokenPayload(encodedPayload);
+  if (!timingSafeCompare(receivedSignature, expectedSignature)) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
+    if (!payload?.exp || payload.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function generateAccessToken(user) {
+  return generateSignedToken(
+    {
+      type: 'access',
+      sub: user.id,
+      email: user.email,
+    },
+    7 * 24 * 60 * 60,
+  );
+}
+
+function generateEmailConfirmationToken(user) {
+  return generateSignedToken(
+    {
+      type: 'email-confirmation',
+      sub: user.id,
+      email: user.email,
+    },
+    24 * 60 * 60,
+  );
+}
+
+function extractBearerToken(req) {
+  const authHeader = String(req.get('authorization') || '');
+  const [scheme, token] = authHeader.split(' ');
+  if (scheme?.toLowerCase() !== 'bearer' || !token) {
+    return null;
+  }
+  return token.trim();
+}
+
+async function requireUserAuth(req, res, next) {
+  const token = extractBearerToken(req);
+  if (!token) {
+    return res.status(401).json({error: 'Not authenticated'});
+  }
+
+  const payload = verifySignedToken(token);
+  if (!payload || payload.type !== 'access' || !payload.sub) {
+    return res.status(401).json({error: 'Invalid token'});
+  }
+
+  try {
+    const user = await getUserById(payload.sub);
+    if (!user) {
+      return res.status(401).json({error: 'User not found'});
+    }
+    req.authUser = user;
+    return next();
+  } catch (error) {
+    console.error('requireUserAuth error', error);
+    return res.status(500).json({error: 'Internal server error'});
+  }
+}
+
 function requireAdminSession(req, res, next) {
   if (!req.session?.isAdmin) {
     return res.status(401).json({error: 'not authenticated'});
@@ -582,6 +712,24 @@ async function sendReminderEmail(booking) {
   await sendBookingEmail({to: booking.email, subject, text, html});
 }
 
+async function sendRegistrationConfirmationEmail(user, confirmationToken) {
+  const confirmationUrl = buildRegistrationConfirmApiUrl(confirmationToken);
+  const subject = 'Conferma il tuo account - Alba Music Academy';
+  const text = `Ciao ${user.full_name},\n\nconferma la registrazione cliccando qui: ${confirmationUrl}\n\nIl link scade tra 24 ore.`;
+  const html = `
+    <p>Ciao <strong>${user.full_name}</strong>,</p>
+    <p>grazie per esserti registrato su Alba Music Academy.</p>
+    <p>Per attivare il tuo account clicca qui:</p>
+    <p>
+      <a href="${confirmationUrl}" style="display:inline-block;padding:10px 16px;background:#61dee3;color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:700;">Conferma registrazione</a>
+    </p>
+    <p>Il link scade tra 24 ore.</p>
+    <p>Grazie,<br/>Alba Music Academy</p>
+  `;
+
+  await sendBookingEmail({to: user.email, subject, text, html});
+}
+
 // ============ SERVE STATIC FRONTEND ============
 const distPath = path.join(__dirname, '..', 'dist');
 const distExists = (() => {
@@ -627,7 +775,7 @@ app.get('/api/slots', async (req, res) => {
   }
 });
 
-app.post('/api/bookings', async (req, res) => {
+app.post('/api/bookings', requireUserAuth, async (req, res) => {
   try {
     const payload = req.body || {};
     const validationError = validateBookingInput(payload);
@@ -643,12 +791,17 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(409).json({error: 'slot is already booked'});
     }
 
+    const user = req.authUser;
+    if (!user?.verified_email) {
+      return res.status(403).json({error: 'Conferma prima la tua email per prenotare'});
+    }
+
     // Create booking
     const booking = await createBooking({
-      user_id: null, // Public booking (not linked to user)
-      email: payload.email.trim().toLowerCase(),
-      full_name: payload.fullName.trim(),
-      phone: String(payload.phone || '').trim() || null,
+      user_id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      phone: String(user.phone || '').trim() || null,
       notes: String(payload.notes || '').trim() || null,
       date: payload.date,
       time: payload.time,
@@ -667,8 +820,7 @@ app.post('/api/bookings', async (req, res) => {
         confirmToken: booking.confirm_token,
         cancelToken: booking.cancel_token,
       });
-      // Update confirmation_sent_at timestamp
-      await updateReminderSent(booking.id); // TODO: Fix this - need updateConfirmationSent
+      await updateConfirmationSent(booking.id);
       emailSent = true;
     } catch (error) {
       console.error('failed to send confirmation email', error);
@@ -901,15 +1053,18 @@ app.post('/api/admin/smtp/test', requireAllowedAdminOrigin, requireAdminSession,
 
 app.post('/api/auth/signup', async (req, res) => {
   try {
-    const { email, password, fullName } = req.body || {};
+    const { email, password, fullName, phone } = req.body || {};
 
-    if (!email || !password || !fullName) {
-      return res.status(400).json({error: 'Email, password, and full name required'});
+    if (!email || !password || !fullName || !phone) {
+      return res.status(400).json({error: 'Email, password, full name and phone are required'});
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email.trim())) {
+    if (!isValidEmail(email)) {
       return res.status(400).json({error: 'Invalid email format'});
+    }
+
+    if (!isValidPhone(phone)) {
+      return res.status(400).json({error: 'Numero di telefono non valido'});
     }
 
     if (password.length < 6) {
@@ -929,17 +1084,31 @@ app.post('/api/auth/signup', async (req, res) => {
     const user = await createUser({
       email: email.toLowerCase().trim(),
       full_name: fullName.trim(),
+      phone: String(phone).trim(),
       password_hash: passwordHash,
       verified_email: false,
       created_at: new Date().toISOString(),
     });
 
+    let confirmationEmailSent = false;
+    try {
+      const confirmationToken = generateEmailConfirmationToken(user);
+      await sendRegistrationConfirmationEmail(user, confirmationToken);
+      confirmationEmailSent = true;
+    } catch (mailError) {
+      console.error('[api] POST /api/auth/signup confirmation mail error', mailError);
+    }
+
     return res.status(201).json({
-      message: 'User created successfully',
+      message: confirmationEmailSent
+        ? 'Registrazione completata. Controlla la tua email per confermare l account.'
+        : 'Registrazione completata, ma non siamo riusciti a inviare l email di conferma. Contatta la segreteria.',
+      confirmationEmailSent,
       user: {
         id: user.id,
         email: user.email,
         fullName: user.full_name,
+        phone: user.phone || String(phone).trim(),
       },
     });
   } catch (error) {
@@ -966,13 +1135,20 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({error: 'Invalid email or password'});
     }
 
-    // TODO: Implement JWT token generation
+    if (!user.verified_email) {
+      return res.status(403).json({error: 'Conferma prima la tua email per accedere'});
+    }
+
+    const accessToken = generateAccessToken(user);
+
     return res.json({
       message: 'Login successful',
+      token: accessToken,
       user: {
         id: user.id,
         email: user.email,
         fullName: user.full_name,
+        phone: user.phone || null,
       },
     });
   } catch (error) {
@@ -981,20 +1157,56 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-app.get('/api/auth/me', async (req, res) => {
+app.post('/api/auth/logout', async (_req, res) => {
+  return res.json({message: 'Logout successful'});
+});
+
+app.get('/api/auth/confirm-email/:token', async (req, res) => {
   try {
-    // TODO: Validate JWT from Authorization header
-    return res.status(401).json({error: 'Not authenticated'});
+    const {token} = req.params;
+    const payload = verifySignedToken(token);
+
+    if (!payload || payload.type !== 'email-confirmation' || !payload.sub) {
+      return res.redirect(302, `${frontendAppUrl}/login?emailConfirmed=0`);
+    }
+
+    const user = await getUserById(payload.sub);
+    if (!user) {
+      return res.redirect(302, `${frontendAppUrl}/login?emailConfirmed=0`);
+    }
+
+    if (!user.verified_email) {
+      await markUserEmailVerified(user.id);
+    }
+
+    return res.redirect(302, `${frontendAppUrl}/login?emailConfirmed=1`);
+  } catch (error) {
+    console.error('[api] GET /api/auth/confirm-email/:token error', error);
+    return res.redirect(302, `${frontendAppUrl}/login?emailConfirmed=0`);
+  }
+});
+
+app.get('/api/auth/me', requireUserAuth, async (req, res) => {
+  try {
+    const user = req.authUser;
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.full_name,
+        phone: user.phone || null,
+      },
+    });
   } catch (error) {
     console.error('[api] GET /api/auth/me error', error);
     res.status(500).json({error: 'Internal server error'});
   }
 });
 
-app.get('/api/user/bookings', async (req, res) => {
+app.get('/api/user/bookings', requireUserAuth, async (req, res) => {
   try {
-    // TODO: Get user from JWT
-    return res.status(401).json({error: 'Not authenticated'});
+    const bookings = await getUserBookings(req.authUser.id);
+    return res.json({bookings});
   } catch (error) {
     console.error('[api] GET /api/user/bookings error', error);
     res.status(500).json({error: 'Internal server error'});

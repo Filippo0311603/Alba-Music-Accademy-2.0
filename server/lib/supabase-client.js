@@ -150,6 +150,23 @@ export async function updateReminderSent(bookingId) {
 }
 
 /**
+ * Updates confirmation sent timestamp
+ */
+export async function updateConfirmationSent(bookingId) {
+  const { data, error } = await supabase
+    .from('bookings')
+    .update({
+      confirmation_sent_at: new Date().toISOString(),
+    })
+    .eq('id', bookingId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
  * Gets a user by email
  */
 export async function getUserByEmail(email) {
@@ -167,9 +184,53 @@ export async function getUserByEmail(email) {
  * Creates a new user
  */
 export async function createUser(userData) {
+  const { data, error } = await supabase.from('users').insert([userData]).select().single();
+
+  // Backward-compatibility for legacy schemas without `phone`.
+  if (error && String(error.message || '').includes("column 'phone'")) {
+    const userDataWithoutPhone = {
+      ...userData,
+    };
+    delete userDataWithoutPhone.phone;
+
+    const retry = await supabase
+      .from('users')
+      .insert([userDataWithoutPhone])
+      .select()
+      .single();
+
+    if (retry.error) throw retry.error;
+    return retry.data;
+  }
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Gets a user by id
+ */
+export async function getUserById(userId) {
   const { data, error } = await supabase
     .from('users')
-    .insert([userData])
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return data || null;
+}
+
+/**
+ * Marks a user email as verified
+ */
+export async function markUserEmailVerified(userId) {
+  const { data, error } = await supabase
+    .from('users')
+    .update({
+      verified_email: true,
+    })
+    .eq('id', userId)
     .select()
     .single();
 

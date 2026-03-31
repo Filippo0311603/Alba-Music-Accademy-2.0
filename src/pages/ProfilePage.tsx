@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, LogOut, Calendar, Clock, User, Mail, Phone, FileText, Loader } from 'lucide-react';
 import { useAuth } from '../lib/auth-context';
-import { API_URL } from '../lib/api';
+import { bookingAPI } from '../lib/api';
 
 type Booking = {
   id: string;
@@ -43,19 +43,7 @@ export default function ProfilePage() {
       setError('');
 
       try {
-        const token = localStorage.getItem('alba_token');
-        const response = await fetch(`${API_URL}/api/user/bookings`, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch bookings');
-        }
-
-        const data = await response.json();
+        const data = await bookingAPI.getMyBookings();
         setBookings(data.bookings || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load bookings');
@@ -160,6 +148,13 @@ export default function ProfilePage() {
               <div>
                 <p className="text-xs uppercase tracking-wider text-white/50">Email</p>
                 <p className="text-sm font-bold">{user.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Phone className="w-5 h-5 text-brand-red" />
+              <div>
+                <p className="text-xs uppercase tracking-wider text-white/50">Telefono</p>
+                <p className="text-sm font-bold">{user.phone || 'Non disponibile'}</p>
               </div>
             </div>
           </div>

@@ -8,6 +8,12 @@ const runtimeFallbackApiUrl =
 
 export const API_URL = (rawApiUrl || runtimeFallbackApiUrl).replace(/\/$/, '');
 const apiTimeoutMs = Number(import.meta.env.VITE_API_TIMEOUT_MS || 20000);
+const AUTH_TOKEN_KEY = 'alba_token';
+
+function getAuthHeaders() {
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export async function apiCall(
   endpoint: string,
@@ -45,16 +51,38 @@ export const bookingAPI = {
   getSlots: (date: string) => apiCall(`/api/slots?date=${date}`),
   
   createBooking: (data: {
-    fullName: string;
-    email: string;
-    phone: string;
-    notes: string;
     date: string;
     time: string;
+    notes?: string;
   }) => apiCall('/api/bookings', {
     method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+    },
     body: JSON.stringify(data),
   }),
+
+  getMyBookings: () =>
+    apiCall('/api/user/bookings', {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    }),
+
+  getMyProfile: () =>
+    apiCall('/api/auth/me', {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    }),
+
+  logoutUser: () =>
+    apiCall('/api/auth/logout', {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+      },
+    }),
 
   confirmBooking: (token: string) => 
     apiCall(`/api/bookings/confirm/${token}`),

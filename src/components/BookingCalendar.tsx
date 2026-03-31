@@ -1,11 +1,15 @@
 import React, {useEffect, useMemo, useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 import {format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, eachDayOfInterval} from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Clock, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { bookingAPI } from '../lib/api';
+import { useAuth } from '../lib/auth-context';
 
 export default function BookingCalendar() {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -14,12 +18,6 @@ export default function BookingCalendar() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{type: 'success' | 'error' | 'warning'; message: string} | null>(null);
   const [confirmationPopup, setConfirmationPopup] = useState<{title: string; message: string} | null>(null);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    notes: '',
-  });
 
   const times = [
     "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
@@ -55,17 +53,14 @@ export default function BookingCalendar() {
     loadBookedTimes();
   }, [selectedDateKey]);
 
-  const onFormChange = (field: 'fullName' | 'email' | 'phone' | 'notes', value: string) => {
-    setFormData((prev) => ({...prev, [field]: value}));
-  };
-
   const submitBooking = async () => {
-    if (!selectedTime) {
-      setFeedback({type: 'error', message: 'Seleziona prima un orario disponibile.'});
+    if (!isAuthenticated) {
+      setFeedback({type: 'warning', message: 'Per prenotare devi accedere con il tuo account.'});
       return;
     }
-    if (!formData.fullName.trim() || !formData.email.trim()) {
-      setFeedback({type: 'error', message: 'Nome e email sono obbligatori.'});
+
+    if (!selectedTime) {
+      setFeedback({type: 'error', message: 'Seleziona prima un orario disponibile.'});
       return;
     }
 
@@ -74,10 +69,6 @@ export default function BookingCalendar() {
 
     try {
       const data = await bookingAPI.createBooking({
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        notes: formData.notes,
         date: selectedDateKey,
         time: selectedTime,
       });
@@ -90,7 +81,7 @@ export default function BookingCalendar() {
       const destinationEmail =
         typeof data.email === 'string' && data.email.trim()
           ? data.email.trim()
-          : formData.email.trim();
+          : (user?.email || 'la tua email');
 
       setConfirmationPopup({
         title: data.emailSent === false ? 'Richiesta salvata' : 'Controlla la tua email',
@@ -99,7 +90,6 @@ export default function BookingCalendar() {
           : `Per completare la prenotazione devi cliccare il bottone "Conferma prenotazione" nella email inviata a ${destinationEmail}.`,
       });
 
-      setFormData({fullName: '', email: '', phone: '', notes: ''});
       setSelectedTime(null);
       await loadBookedTimes();
     } catch (error) {
@@ -217,35 +207,10 @@ export default function BookingCalendar() {
             ))}
           </div>
 
-          <div className="space-y-3 mb-6">
-            <input
-              type="text"
-              value={formData.fullName}
-              onChange={(event) => onFormChange('fullName', event.target.value)}
-              placeholder="Nome e cognome"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-brand-red"
-            />
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(event) => onFormChange('email', event.target.value)}
-              placeholder="Email"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-brand-red"
-            />
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(event) => onFormChange('phone', event.target.value)}
-              placeholder="Telefono (opzionale)"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-brand-red"
-            />
-            <textarea
-              value={formData.notes}
-              onChange={(event) => onFormChange('notes', event.target.value)}
-              placeholder="Note (opzionale)"
-              rows={3}
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-sm outline-none focus:border-brand-red resize-none"
-            />
+          <div className="mb-6 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75">
+            {isAuthenticated
+              ? `Prenotazione associata al tuo account: ${user?.email || 'utente loggato'}`
+              : 'Accedi o registrati per poter prenotare la sala prove.'}
           </div>
 
           {feedback && (
@@ -263,16 +228,25 @@ export default function BookingCalendar() {
 
           <button 
             onClick={submitBooking}
-            disabled={!selectedTime || isSubmitting}
+            disabled={!selectedTime || isSubmitting || !isAuthenticated}
             className={cn(
               "mt-auto w-full py-4 rounded-xl font-bold transition-all",
-              selectedTime && !isSubmitting
+              selectedTime && !isSubmitting && isAuthenticated
                 ? "bg-brand-red hover:scale-[1.02] active:scale-95" 
                 : "bg-white/5 text-white/20 cursor-not-allowed"
             )}
           >
-            {isSubmitting ? 'Invio in corso...' : 'Prenota Ora'}
+            {isSubmitting ? 'Invio in corso...' : isAuthenticated ? 'Prenota Ora' : 'Accedi per prenotare'}
           </button>
+
+          {!isAuthenticated && (
+            <button
+              onClick={() => navigate('/login')}
+              className="mt-3 w-full py-3 rounded-xl border border-brand-red/40 text-brand-red font-bold hover:bg-brand-red/10 transition-colors"
+            >
+              Vai al Login
+            </button>
+          )}
         </div>
       </div>
 

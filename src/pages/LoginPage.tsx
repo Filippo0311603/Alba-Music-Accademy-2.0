@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Loader } from 'lucide-react';
 import { useAuth } from '../lib/auth-context';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, error, clearError, isLoading } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ export default function LoginPage() {
   });
 
   const [localError, setLocalError] = useState('');
+  const emailConfirmed = searchParams.get('emailConfirmed');
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -51,6 +53,18 @@ export default function LoginPage() {
 
         <h1 className="text-3xl font-black uppercase mb-2">Accedi</h1>
         <p className="text-white/50 text-sm mb-8">Inserisci le tue credenziali per accedere al tuo profilo.</p>
+
+        {emailConfirmed === '1' && (
+          <div className="rounded-lg bg-green-300/10 border border-green-300/40 px-3 py-2 mb-4">
+            <p className="text-green-300 text-sm">Email confermata con successo. Ora puoi accedere.</p>
+          </div>
+        )}
+
+        {emailConfirmed === '0' && (
+          <div className="rounded-lg bg-red-300/10 border border-red-300/40 px-3 py-2 mb-4">
+            <p className="text-red-300 text-sm">Link di conferma non valido o scaduto. Ripeti la registrazione.</p>
+          </div>
+        )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
