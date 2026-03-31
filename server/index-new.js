@@ -2,23 +2,36 @@ import express from 'express';
 import session from 'express-session';
 import fsSync from 'node:fs';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
-import { getAllBookings, getBookingsByDate, createBooking, updateBookingStatus, findBookingByConfirmToken, findBookingByCancelToken, getBookingsNeedingReminder, updateReminderSent, getUserByEmail, createUser, getUserBookings } from './lib/supabase-client.js';
+import {
+  getAllBookings,
+  getBookingsByDate,
+  createBooking,
+  updateBookingStatus,
+  findBookingByConfirmToken,
+  findBookingByCancelToken,
+  getBookingsNeedingReminder,
+  updateReminderSent,
+  getUserByEmail,
+  createUser,
+  getUserBookings,
+} from './lib/supabase-client.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const envLocalPath = path.resolve(__dirname, '..', '.env.local');
-const envPath = path.resolve(__dirname, '..', '.env');
 
-dotenv.config({path: envPath});
-dotenv.config({path: envLocalPath, override: true});
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+dotenv.config({ path: path.resolve(__dirname, '..', '.env.local'), override: true });
 
 const app = express();
 const port = Number(process.env.BOOKING_SERVER_PORT || 8787);
+
+// ============ URL NORMALIZATION ============
+
 function normalizePublicAppUrl(rawValue, fallbackPort) {
   const fallback = `http://localhost:${fallbackPort}`;
   const value = String(rawValue || fallback).trim();
@@ -40,10 +53,15 @@ const frontendAppUrl = normalizePublicAppUrl(
   process.env.FRONTEND_APP_URL || String(process.env.ADMIN_ALLOWED_ORIGINS || '').split(',')[0],
   port,
 );
+
+// ============ CONFIGURATION ============
+
 const reminderWindowMs = 24 * 60 * 60 * 1000;
 const smtpTimeoutMs = Number(process.env.SMTP_TIMEOUT_MS || 12000);
 const mailjetApiTimeoutMs = Number(process.env.MAILJET_API_TIMEOUT_MS || 15000);
-const mailjetApiEndpoint = String(process.env.MAILJET_API_ENDPOINT || 'https://api.mailjet.com/v3.1/send').trim();
+const mailjetApiEndpoint = String(
+  process.env.MAILJET_API_ENDPOINT || 'https://api.mailjet.com/v3.1/send',
+).trim();
 const smtpFallbackPorts = String(process.env.SMTP_FALLBACK_PORTS || '587,465,2525')
   .split(',')
   .map((value) => Number(value.trim()))
@@ -52,8 +70,8 @@ const adminUsername = process.env.ADMIN_USERNAME || 'admin';
 const adminPassword = process.env.ADMIN_PASSWORD || 'change-me-now';
 const sessionSecret = process.env.ADMIN_SESSION_SECRET || crypto.randomBytes(48).toString('hex');
 const sessionTtlHours = Number(process.env.ADMIN_SESSION_TTL_HOURS || 8);
-const jwtSecret = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const bcryptRounds = 10;
+
 const isProduction = process.env.NODE_ENV === 'production';
 const defaultAdminPassword = adminPassword === 'change-me-now';
 const weakSessionSecret = sessionSecret.length < 32;
@@ -61,6 +79,20 @@ const weakSessionSecret = sessionSecret.length < 32;
 const loginAttempts = new Map();
 const loginWindowMs = 15 * 60 * 1000;
 const maxLoginAttempts = 5;
+
+if (defaultAdminPassword) {
+  console.warn('[admin-auth] ADMIN_PASSWORD usa il valore di default: aggiornalo prima del deploy.');
+}
+
+if (weakSessionSecret) {
+  console.warn('[admin-auth] ADMIN_SESSION_SECRET dovrebbe avere almeno 32 caratteri.');
+}
+
+if (isProduction && (defaultAdminPassword || weakSessionSecret)) {
+  throw new Error('Hardening check failed: imposta ADMIN_PASSWORD sicura e ADMIN_SESSION_SECRET >= 32 caratteri.');
+}
+
+// ============ ALLOWED ORIGINS ============
 
 function parseAllowedOrigins() {
   const fromEnv = String(process.env.ADMIN_ALLOWED_ORIGINS || '')
@@ -81,14 +113,12 @@ function parseAllowedOrigins() {
     try {
       origins.add(new URL(value).origin);
     } catch {
-      // Ignore invalid origins in env values.
+      // Ignore invalid origins
     }
   }
 
   return origins;
 }
-
-const allowedAdminOrigins = parseAllowedOrigins();
 
 function parseCorsAllowedOrigins() {
   const fromEnv = String(process.env.CORS_ALLOWED_ORIGINS || process.env.ADMIN_ALLOWED_ORIGINS || '')
@@ -108,32 +138,24 @@ function parseCorsAllowedOrigins() {
     try {
       origins.add(new URL(value).origin);
     } catch {
-      // Ignore invalid origins in env values.
+      // Ignore invalid origins
     }
   }
 
   return origins;
 }
 
+const allowedAdminOrigins = parseAllowedOrigins();
 const corsAllowedOrigins = parseCorsAllowedOrigins();
 
-if (defaultAdminPassword) {
-  console.warn('[admin-auth] ADMIN_PASSWORD usa il valore di default: aggiornalo prima del deploy.');
-}
-
-if (weakSessionSecret) {
-  console.warn('[admin-auth] ADMIN_SESSION_SECRET dovrebbe avere almeno 32 caratteri.');
-}
-
-if (isProduction && (defaultAdminPassword || weakSessionSecret)) {
-  throw new Error('Hardening check failed: imposta ADMIN_PASSWORD sicura e ADMIN_SESSION_SECRET >= 32 caratteri.');
-}
+// ============ EXPRESS CONFIG ============
 
 app.disable('x-powered-by');
 if (isProduction) {
   app.set('trust proxy', 1);
 }
 
+// CORS Middleware
 app.use((req, res, next) => {
   const origin = String(req.get('origin') || '').trim();
 
@@ -161,7 +183,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({limit: '32kb'}));
+app.use(express.json({ limit: '32kb' }));
+
+// Security Headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -169,6 +193,8 @@ app.use((req, res, next) => {
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   next();
 });
+
+// Session Middleware
 app.use(
   session({
     name: 'alba_admin_session',
@@ -184,7 +210,199 @@ app.use(
   }),
 );
 
+// ============ EMAIL UTILITIES ============
+
 let mailTransporterPromise;
+
+async function getMailer() {
+  if (mailTransporterPromise) {
+    return mailTransporterPromise;
+  }
+
+  mailTransporterPromise = (async () => {
+    const host = process.env.SMTP_HOST;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    const smtpPort = Number(process.env.SMTP_PORT || 587);
+
+    if (host && user && pass) {
+      return {
+        kind: 'smtp',
+        host,
+        user,
+        pass,
+        ports: [smtpPort, ...smtpFallbackPorts.filter((value) => value !== smtpPort)],
+      };
+    }
+
+    const testAccount = await nodemailer.createTestAccount();
+    return {
+      kind: 'ethereal',
+      user: testAccount.user,
+      pass: testAccount.pass,
+    };
+  })();
+
+  return mailTransporterPromise;
+}
+
+async function sendBookingEmail({ to, subject, html, text }) {
+  const mailer = await getMailer();
+  const from = process.env.MAIL_FROM || 'Alba Music Academy <no-reply@albamusic.local>';
+  const mailPayload = { from, to, subject, html, text };
+
+  if (mailer.kind === 'ethereal') {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: mailer.user,
+        pass: mailer.pass,
+      },
+      connectionTimeout: smtpTimeoutMs,
+      greetingTimeout: smtpTimeoutMs,
+      socketTimeout: smtpTimeoutMs,
+    });
+
+    const info = await transporter.sendMail(mailPayload);
+    const preview = nodemailer.getTestMessageUrl(info);
+    if (preview) {
+      console.log(`[mail-preview] ${preview}`);
+    }
+    return;
+  }
+
+  const smtpHost = String(process.env.SMTP_HOST || '').toLowerCase();
+  const shouldTryMailjetApiFirst =
+    smtpHost.includes('mailjet') && process.env.MAILJET_API_ENABLED !== 'false';
+
+  if (shouldTryMailjetApiFirst) {
+    const match = from.match(/^(.*)<([^>]+)>\s*$/);
+    const fromName = match ? match[1].trim().replace(/^"|"$/g, '') : 'Alba Music Academy';
+    const fromEmail = match ? match[2].trim() : from.trim();
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), mailjetApiTimeoutMs);
+
+    try {
+      const auth = Buffer.from(`${mailer.user}:${mailer.pass}`).toString('base64');
+      const response = await fetch(mailjetApiEndpoint, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          Messages: [
+            {
+              From: { Email: fromEmail, Name: fromName || 'Alba Music Academy' },
+              To: [{ Email: String(to) }],
+              Subject: String(subject),
+              TextPart: String(text || ''),
+              HTMLPart: String(html || ''),
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const details = await response.text();
+        throw new Error(`mailjet api ${response.status}: ${details}`);
+      }
+
+      return;
+    } catch (error) {
+      console.error('[mailjet-api] send failed, fallback to smtp', {
+        message: error?.message,
+        name: error?.name,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  let lastError = null;
+  for (const portOption of mailer.ports) {
+    const transporter = nodemailer.createTransport({
+      host: mailer.host,
+      port: portOption,
+      secure: portOption === 465,
+      requireTLS: portOption !== 465,
+      auth: { user: mailer.user, pass: mailer.pass },
+      connectionTimeout: smtpTimeoutMs,
+      greetingTimeout: smtpTimeoutMs,
+      socketTimeout: smtpTimeoutMs,
+      tls: {
+        minVersion: 'TLSv1.2',
+      },
+    });
+
+    try {
+      const info = await transporter.sendMail(mailPayload);
+      const preview = nodemailer.getTestMessageUrl(info);
+      if (preview) {
+        console.log(`[mail-preview] ${preview}`);
+      }
+      return;
+    } catch (error) {
+      lastError = error;
+      console.error(`[smtp] send failed on port ${portOption}`, {
+        code: error?.code,
+        responseCode: error?.responseCode,
+        command: error?.command,
+        message: error?.message,
+      });
+    }
+  }
+
+  throw lastError || new Error('smtp send failed on all configured ports');
+}
+
+function buildCancelUrl(cancelToken) {
+  return `${frontendAppUrl}/booking/cancel/${cancelToken}`;
+}
+
+function buildConfirmUrl(confirmToken) {
+  return `${frontendAppUrl}/booking/confirm/${confirmToken}`;
+}
+
+async function sendConfirmationEmail(booking) {
+  const confirmUrl = buildConfirmUrl(booking.confirm_token);
+  const cancelUrl = buildCancelUrl(booking.cancel_token);
+  const subject = 'Conferma la tua prenotazione - Alba Music Academy';
+  const text = `Ciao ${booking.full_name},\n\nabbiamo ricevuto la tua richiesta per il ${booking.date} alle ${booking.time}.\n\nPer completare la prenotazione clicca qui: ${confirmUrl}\n\nSe vuoi annullare la richiesta: ${cancelUrl}\n\nGrazie.`;
+  const html = `
+    <p>Ciao <strong>${booking.full_name}</strong>,</p>
+    <p>abbiamo ricevuto la tua richiesta per <strong>${booking.date}</strong> alle <strong>${booking.time}</strong>.</p>
+    <p>Per completare la prenotazione clicca su <strong>Conferma prenotazione</strong>:</p>
+    <p style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="${confirmUrl}" style="display:inline-block;padding:10px 16px;background:#61dee3;color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:700;">Conferma prenotazione</a>
+      <a href="${cancelUrl}" style="display:inline-block;padding:10px 16px;background:#222;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;border:1px solid #555;">Annulla richiesta</a>
+    </p>
+    <p>Grazie,<br/>Alba Music Academy</p>
+  `;
+
+  await sendBookingEmail({ to: booking.email, subject, text, html });
+}
+
+async function sendReminderEmail(booking) {
+  const cancelUrl = buildCancelUrl(booking.cancel_token);
+  const subject = 'Promemoria prenotazione - manca 1 giorno';
+  const text = `Ciao ${booking.full_name},\n\nti ricordiamo che domani hai la prenotazione alle ${booking.time}.\n\nSe vuoi disdire: ${cancelUrl}`;
+  const html = `
+    <p>Ciao <strong>${booking.full_name}</strong>,</p>
+    <p>ti ricordiamo che <strong>domani</strong> hai la prenotazione alle <strong>${booking.time}</strong>.</p>
+    <p>Se vuoi disdire, clicca qui:</p>
+    <p><a href="${cancelUrl}" style="display:inline-block;padding:10px 16px;background:#61dee3;color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:700;">Disdici prenotazione</a></p>
+    <p>A presto,<br/>Alba Music Academy</p>
+  `;
+
+  await sendBookingEmail({ to: booking.email, subject, text, html });
+}
+
+// ============ AUTH UTILITIES ============
 
 function getClientIdentifier(req) {
   return String(req.ip || req.connection?.remoteAddress || 'unknown');
@@ -196,7 +414,7 @@ function getLoginAttemptEntry(req) {
   const entry = loginAttempts.get(key);
 
   if (!entry || now > entry.expiresAt) {
-    const fresh = {count: 0, expiresAt: now + loginWindowMs};
+    const fresh = { count: 0, expiresAt: now + loginWindowMs };
     loginAttempts.set(key, fresh);
     return fresh;
   }
@@ -219,6 +437,29 @@ function isLoginRateLimited(req) {
   return entry.count >= maxLoginAttempts;
 }
 
+function safeText(value) {
+  return Buffer.from(String(value || ''), 'utf8');
+}
+
+function timingSafeCompare(left, right) {
+  const a = safeText(left);
+  const b = safeText(right);
+
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(a, b);
+}
+
+function requireAdminSession(req, res, next) {
+  if (!req.session?.isAdmin) {
+    return res.status(401).json({ error: 'not authenticated' });
+  }
+
+  return next();
+}
+
 function requireAllowedAdminOrigin(req, res, next) {
   const origin = String(req.get('origin') || '');
   if (!origin) {
@@ -231,11 +472,37 @@ function requireAllowedAdminOrigin(req, res, next) {
       return next();
     }
   } catch {
-    return res.status(403).json({error: 'origin non valido'});
+    return res.status(403).json({ error: 'origin non valido' });
   }
 
-  return res.status(403).json({error: 'origin non autorizzato'});
+  return res.status(403).json({ error: 'origin non autorizzato' });
 }
+
+function regenerateSession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
+function destroySession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.destroy((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
+// ============ VALIDATION ============
 
 function parseBookingStart(date, time) {
   const [year, month, day] = date.split('-').map(Number);
@@ -277,210 +544,56 @@ function validateBookingInput(payload) {
   return null;
 }
 
-async function getMailer() {
-  if (mailTransporterPromise) {
-    return mailTransporterPromise;
-  }
-
-  mailTransporterPromise = (async () => {
-    const host = process.env.SMTP_HOST;
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-    const smtpPort = Number(process.env.SMTP_PORT || 587);
-
-    if (host && user && pass) {
-      return {
-        kind: 'smtp',
-        host,
-        user,
-        pass,
-        ports: [smtpPort, ...smtpFallbackPorts.filter((value) => value !== smtpPort)],
-      };
-    }
-
-    const testAccount = await nodemailer.createTestAccount();
-    return {
-      kind: 'ethereal',
-      user: testAccount.user,
-      pass: testAccount.pass,
-    };
-  })();
-
-  return mailTransporterPromise;
-}
-
-async function sendBookingEmail({to, subject, html, text}) {
-  const mailer = await getMailer();
-  const from = process.env.MAIL_FROM || 'Alba Music Academy <no-reply@albamusic.local>';
-  const mailPayload = {from, to, subject, html, text};
-
-  if (mailer.kind === 'ethereal') {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: mailer.user,
-        pass: mailer.pass,
-      },
-      connectionTimeout: smtpTimeoutMs,
-      greetingTimeout: smtpTimeoutMs,
-      socketTimeout: smtpTimeoutMs,
-    });
-
-    const info = await transporter.sendMail(mailPayload);
-    const preview = nodemailer.getTestMessageUrl(info);
-    if (preview) {
-      console.log(`[mail-preview] ${preview}`);
-    }
-    return;
-  }
-
-  const smtpHost = String(process.env.SMTP_HOST || '').toLowerCase();
-  const shouldTryMailjetApiFirst = smtpHost.includes('mailjet') && process.env.MAILJET_API_ENABLED !== 'false';
-
-  if (shouldTryMailjetApiFirst) {
-    const match = from.match(/^(.*)<([^>]+)>\s*$/);
-    const fromName = match ? match[1].trim().replace(/^"|"$/g, '') : 'Alba Music Academy';
-    const fromEmail = match ? match[2].trim() : from.trim();
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), mailjetApiTimeoutMs);
-
-    try {
-      const auth = Buffer.from(`${mailer.user}:${mailer.pass}`).toString('base64');
-      const response = await fetch(mailjetApiEndpoint, {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          Authorization: `Basic ${auth}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          Messages: [
-            {
-              From: {Email: fromEmail, Name: fromName || 'Alba Music Academy'},
-              To: [{Email: String(to)}],
-              Subject: String(subject),
-              TextPart: String(text || ''),
-              HTMLPart: String(html || ''),
-            },
-          ],
-        }),
-      });
-
-      if (!response.ok) {
-        const details = await response.text();
-        throw new Error(`mailjet api ${response.status}: ${details}`);
-      }
-
-      return;
-    } catch (error) {
-      console.error('[mailjet-api] send failed, fallback to smtp', {
-        message: error?.message,
-        name: error?.name,
-      });
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-
-  let lastError = null;
-  for (const portOption of mailer.ports) {
-    const transporter = nodemailer.createTransport({
-      host: mailer.host,
-      port: portOption,
-      secure: portOption === 465,
-      requireTLS: portOption !== 465,
-      auth: {user: mailer.user, pass: mailer.pass},
-      connectionTimeout: smtpTimeoutMs,
-      greetingTimeout: smtpTimeoutMs,
-      socketTimeout: smtpTimeoutMs,
-      tls: {
-        minVersion: 'TLSv1.2',
-      },
-    });
-
-    try {
-      const info = await transporter.sendMail(mailPayload);
-      const preview = nodemailer.getTestMessageUrl(info);
-      if (preview) {
-        console.log(`[mail-preview] ${preview}`);
-      }
-      return;
-    } catch (error) {
-      lastError = error;
-      console.error(`[smtp] send failed on port ${portOption}`, {
-        code: error?.code,
-        responseCode: error?.responseCode,
-        command: error?.command,
-        message: error?.message,
-      });
-    }
-  }
-
-  throw lastError || new Error('smtp send failed on all configured ports');
-}
-
-function buildCancelUrl(cancelToken) {
-  return `${frontendAppUrl}/booking/cancel/${cancelToken}`;
-}
-
-function buildConfirmUrl(confirmToken) {
-  return `${frontendAppUrl}/booking/confirm/${confirmToken}`;
-}
+// ============ BOOKING HELPER FUNCTIONS ============
 
 async function confirmBookingByToken(confirmToken) {
   const booking = await findBookingByConfirmToken(confirmToken);
 
   if (!booking) {
-    return {type: 'not-found'};
+    return { type: 'not-found' };
   }
 
   if (booking.status === 'cancelled') {
-    return {type: 'cancelled', booking};
+    return { type: 'cancelled', booking };
   }
 
   if (booking.status === 'confirmed') {
-    return {type: 'already-confirmed', booking};
+    return { type: 'already-confirmed', booking };
   }
 
-  // Check for slot conflict
   const bookings = await getBookingsByDate(booking.date);
-  const conflict = bookings.find(
-    (b) => b.id !== booking.id && b.status === 'confirmed' && b.time === booking.time,
-  );
+  const conflict = bookings.find((b) => b.id !== booking.id && b.time === booking.time);
 
   if (conflict) {
     await updateBookingStatus(booking.id, 'cancelled', {
       canceled_at: new Date().toISOString(),
     });
-    return {type: 'slot-taken', booking};
+    return { type: 'slot-taken', booking };
   }
 
   const confirmed = await updateBookingStatus(booking.id, 'confirmed', {
     confirmed_at: new Date().toISOString(),
   });
 
-  return {type: 'confirmed', booking: confirmed};
+  return { type: 'confirmed', booking: confirmed };
 }
 
 async function cancelBookingByToken(cancelToken) {
   const booking = await findBookingByCancelToken(cancelToken);
 
   if (!booking) {
-    return {type: 'not-found'};
+    return { type: 'not-found' };
   }
 
   if (booking.status === 'cancelled') {
-    return {type: 'already-cancelled', booking};
+    return { type: 'already-cancelled', booking };
   }
 
   const cancelled = await updateBookingStatus(booking.id, 'cancelled', {
     canceled_at: new Date().toISOString(),
   });
 
-  return {type: 'cancelled', booking: cancelled};
+  return { type: 'cancelled', booking: cancelled };
 }
 
 function serializeBookingForAdmin(booking) {
@@ -501,88 +614,8 @@ function serializeBookingForAdmin(booking) {
   };
 }
 
-function safeText(value) {
-  return Buffer.from(String(value || ''), 'utf8');
-}
-
-function timingSafeCompare(left, right) {
-  const a = safeText(left);
-  const b = safeText(right);
-
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  return crypto.timingSafeEqual(a, b);
-}
-
-function requireAdminSession(req, res, next) {
-  if (!req.session?.isAdmin) {
-    return res.status(401).json({error: 'not authenticated'});
-  }
-
-  return next();
-}
-
-function regenerateSession(req) {
-  return new Promise((resolve, reject) => {
-    req.session.regenerate((error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve();
-    });
-  });
-}
-
-function destroySession(req) {
-  return new Promise((resolve, reject) => {
-    req.session.destroy((error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve();
-    });
-  });
-}
-
-async function sendConfirmationEmail(booking) {
-  const confirmUrl = buildConfirmUrl(booking.confirmToken);
-  const cancelUrl = buildCancelUrl(booking.cancelToken);
-  const subject = 'Conferma la tua prenotazione - Alba Music Academy';
-  const text = `Ciao ${booking.fullName},\n\nabbiamo ricevuto la tua richiesta per il ${booking.date} alle ${booking.time}.\n\nPer completare la prenotazione clicca qui: ${confirmUrl}\n\nSe vuoi annullare la richiesta: ${cancelUrl}\n\nGrazie.`;
-  const html = `
-    <p>Ciao <strong>${booking.fullName}</strong>,</p>
-    <p>abbiamo ricevuto la tua richiesta per <strong>${booking.date}</strong> alle <strong>${booking.time}</strong>.</p>
-    <p>Per completare la prenotazione clicca su <strong>Conferma prenotazione</strong>:</p>
-    <p style="display:flex;gap:10px;flex-wrap:wrap;">
-      <a href="${confirmUrl}" style="display:inline-block;padding:10px 16px;background:#61dee3;color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:700;">Conferma prenotazione</a>
-      <a href="${cancelUrl}" style="display:inline-block;padding:10px 16px;background:#222;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;border:1px solid #555;">Annulla richiesta</a>
-    </p>
-    <p>Grazie,<br/>Alba Music Academy</p>
-  `;
-
-  await sendBookingEmail({to: booking.email, subject, text, html});
-}
-
-async function sendReminderEmail(booking) {
-  const cancelUrl = buildCancelUrl(booking.cancelToken);
-  const subject = 'Promemoria prenotazione - manca 1 giorno';
-  const text = `Ciao ${booking.fullName},\n\nti ricordiamo che domani hai la prenotazione alle ${booking.time}.\n\nSe vuoi disdire: ${cancelUrl}`;
-  const html = `
-    <p>Ciao <strong>${booking.fullName}</strong>,</p>
-    <p>ti ricordiamo che <strong>domani</strong> hai la prenotazione alle <strong>${booking.time}</strong>.</p>
-    <p>Se vuoi disdire, clicca qui:</p>
-    <p><a href="${cancelUrl}" style="display:inline-block;padding:10px 16px;background:#61dee3;color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:700;">Disdici prenotazione</a></p>
-    <p>A presto,<br/>Alba Music Academy</p>
-  `;
-
-  await sendBookingEmail({to: booking.email, subject, text, html});
-}
-
 // ============ SERVE STATIC FRONTEND ============
+
 const distPath = path.join(__dirname, '..', 'dist');
 const distExists = (() => {
   try {
@@ -594,12 +627,13 @@ const distExists = (() => {
 })();
 
 if (distExists) {
-  app.use(express.static(distPath, {
-    maxAge: '1h',
-    etag: false
-  }));
+  app.use(
+    express.static(distPath, {
+      maxAge: '1h',
+      etag: false,
+    }),
+  );
 
-  // SPA fallback: serve index.html for non-API routes
   app.use((req, res, next) => {
     if (!req.path.startsWith('/api') && !req.path.includes('.')) {
       return res.sendFile(path.join(distPath, 'index.html'), (err) => {
@@ -610,42 +644,44 @@ if (distExists) {
   });
 }
 
+// ============ API ROUTES ============
+
+// GET /api/slots - Get available slots for a date
 app.get('/api/slots', async (req, res) => {
   try {
     const date = String(req.query.date || '');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return res.status(400).json({error: 'date must be in YYYY-MM-DD format'});
+      return res.status(400).json({ error: 'date must be in YYYY-MM-DD format' });
     }
 
     const bookings = await getBookingsByDate(date);
     const bookedTimes = bookings.map((b) => b.time);
 
-    res.json({bookedTimes});
+    res.json({ bookedTimes });
   } catch (error) {
-    console.error('[api] /api/slots error', error);
-    res.status(500).json({error: 'Internal server error'});
+    console.error('[api] GET /api/slots error', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// POST /api/bookings - Create a new booking request
 app.post('/api/bookings', async (req, res) => {
   try {
     const payload = req.body || {};
     const validationError = validateBookingInput(payload);
     if (validationError) {
-      return res.status(400).json({error: validationError});
+      return res.status(400).json({ error: validationError });
     }
 
-    // Check for time slot conflict
     const existingBookings = await getBookingsByDate(payload.date);
     const conflict = existingBookings.find((b) => b.time === payload.time);
 
     if (conflict) {
-      return res.status(409).json({error: 'slot is already booked'});
+      return res.status(409).json({ error: 'slot is already booked' });
     }
 
-    // Create booking
     const booking = await createBooking({
-      user_id: null, // Public booking (not linked to user)
+      user_id: null,
       email: payload.email.trim().toLowerCase(),
       full_name: payload.fullName.trim(),
       phone: String(payload.phone || '').trim() || null,
@@ -656,19 +692,19 @@ app.post('/api/bookings', async (req, res) => {
       cancel_token: crypto.randomBytes(24).toString('hex'),
       status: 'pending',
       created_at: new Date().toISOString(),
+      confirmed_at: null,
+      confirmation_sent_at: null,
+      reminder_sent_at: null,
+      canceled_at: null,
     });
 
     let emailSent = false;
 
     try {
-      await sendConfirmationEmail({
-        ...booking,
-        fullName: booking.full_name,
-        confirmToken: booking.confirm_token,
-        cancelToken: booking.cancel_token,
+      await sendConfirmationEmail(booking);
+      await updateBookingStatus(booking.id, 'pending', {
+        confirmation_sent_at: new Date().toISOString(),
       });
-      // Update confirmation_sent_at timestamp
-      await updateReminderSent(booking.id); // TODO: Fix this - need updateConfirmationSent
       emailSent = true;
     } catch (error) {
       console.error('failed to send confirmation email', error);
@@ -684,17 +720,18 @@ app.post('/api/bookings', async (req, res) => {
     });
   } catch (error) {
     console.error('[api] POST /api/bookings error', error);
-    res.status(500).json({error: 'Internal server error'});
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// Booking confirmation routes
 async function handleConfirmBooking(req, res) {
-  const {token} = req.params;
+  const { token } = req.params;
   return res.redirect(302, `${frontendAppUrl}/booking/confirm/${token}`);
 }
 
 async function handleConfirmBookingActionApi(req, res) {
-  const {token} = req.params;
+  const { token } = req.params;
   const outcome = await confirmBookingByToken(token);
 
   if (outcome.type === 'not-found') {
@@ -741,13 +778,14 @@ app.get('/bookings/confirm/:token', handleConfirmBooking);
 app.get('/booking/confirm/:token', handleConfirmBooking);
 app.get('/api/bookings/action/confirm/:token', handleConfirmBookingActionApi);
 
+// Booking cancellation routes
 async function handleCancelBooking(req, res) {
-  const {token} = req.params;
+  const { token } = req.params;
   return res.redirect(302, `${frontendAppUrl}/booking/cancel/${token}`);
 }
 
 async function handleCancelBookingActionApi(req, res) {
-  const {token} = req.params;
+  const { token } = req.params;
   const outcome = await cancelBookingByToken(token);
 
   if (outcome.type === 'not-found') {
@@ -778,10 +816,14 @@ app.get('/bookings/cancel/:token', handleCancelBooking);
 app.get('/booking/cancel/:token', handleCancelBooking);
 app.get('/api/bookings/action/cancel/:token', handleCancelBookingActionApi);
 
+// ============ ADMIN AUTH ROUTES ============
+
 app.post('/api/admin/auth/login', async (req, res) => {
   try {
     if (isLoginRateLimited(req)) {
-      return res.status(429).json({error: 'Troppi tentativi di login. Riprova tra 15 minuti.'});
+      return res
+        .status(429)
+        .json({ error: 'Troppi tentativi di login. Riprova tra 15 minuti.' });
     }
 
     const username = String(req.body?.username || '').trim();
@@ -792,7 +834,7 @@ app.post('/api/admin/auth/login', async (req, res) => {
 
     if (!usernameOk || !passwordOk) {
       registerFailedLogin(req);
-      return res.status(401).json({error: 'Credenziali non valide'});
+      return res.status(401).json({ error: 'Credenziali non valide' });
     }
 
     await regenerateSession(req);
@@ -800,16 +842,16 @@ app.post('/api/admin/auth/login', async (req, res) => {
     req.session.adminUser = adminUsername;
     clearLoginAttempts(req);
 
-    return res.json({message: 'Login effettuato', username: adminUsername});
+    return res.json({ message: 'Login effettuato', username: adminUsername });
   } catch (error) {
     console.error('login error', error);
-    return res.status(500).json({error: 'Errore login admin'});
+    return res.status(500).json({ error: 'Errore login admin' });
   }
 });
 
 app.get('/api/admin/auth/me', (req, res) => {
   if (!req.session?.isAdmin) {
-    return res.status(401).json({authenticated: false});
+    return res.status(401).json({ authenticated: false });
   }
 
   return res.json({
@@ -825,62 +867,60 @@ app.post('/api/admin/auth/logout', requireAllowedAdminOrigin, async (req, res) =
     }
 
     res.clearCookie('alba_admin_session');
-    return res.json({message: 'Logout eseguito'});
+    return res.json({ message: 'Logout eseguito' });
   } catch (error) {
     console.error('logout error', error);
-    return res.status(500).json({error: 'Errore logout admin'});
+    return res.status(500).json({ error: 'Errore logout admin' });
   }
 });
+
+// ============ ADMIN BOOKING ROUTES ============
 
 app.get('/api/admin/bookings', requireAdminSession, async (req, res) => {
   try {
     const bookings = await getAllBookings();
-    return res.json({bookings: bookings.map(serializeBookingForAdmin)});
+    return res.json({ bookings: bookings.map(serializeBookingForAdmin) });
   } catch (error) {
     console.error('[api] GET /api/admin/bookings error', error);
-    res.status(500).json({error: 'Internal server error'});
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.post('/api/admin/bookings/:id/cancel', requireAllowedAdminOrigin, requireAdminSession, async (req, res) => {
   try {
-    const {id} = req.params;
-    const booking = await findBookingByConfirmToken(id) || await findBookingByCancelToken(id);
-
-    if (!booking || booking.id !== id) {
-      return res.status(404).json({error: 'booking not found'});
-    }
-
-    if (booking.status === 'cancelled') {
-      return res.json({message: 'booking is already cancelled'});
-    }
+    const { id } = req.params;
 
     await updateBookingStatus(id, 'cancelled', {
       canceled_at: new Date().toISOString(),
     });
 
-    return res.json({message: 'booking cancelled successfully'});
+    return res.json({ message: 'booking cancelled successfully' });
   } catch (error) {
     console.error('[api] POST /api/admin/bookings/:id/cancel error', error);
-    res.status(500).json({error: 'Internal server error'});
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.post('/api/admin/reminders/run', requireAllowedAdminOrigin, requireAdminSession, async (req, res) => {
-  await processReminders();
-  return res.json({message: 'reminder worker executed'});
+  try {
+    await processReminders();
+    return res.json({ message: 'reminder worker executed' });
+  } catch (error) {
+    console.error('[api] POST /api/admin/reminders/run error', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.post('/api/admin/smtp/test', requireAllowedAdminOrigin, requireAdminSession, async (req, res) => {
   try {
     const to = String(req.body?.to || '').trim().toLowerCase();
     if (!to) {
-      return res.status(400).json({error: 'email destinatario richiesta'});
+      return res.status(400).json({ error: 'email destinatario richiesta' });
     }
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(to)) {
-      return res.status(400).json({error: 'email destinatario non valida'});
+      return res.status(400).json({ error: 'email destinatario non valida' });
     }
 
     await sendBookingEmail({
@@ -890,42 +930,39 @@ app.post('/api/admin/smtp/test', requireAllowedAdminOrigin, requireAdminSession,
       html: '<p>Questa e una email di test SMTP inviata dal pannello admin.</p>',
     });
 
-    return res.json({message: 'Email di test inviata'});
+    return res.json({ message: 'Email di test inviata' });
   } catch (error) {
     console.error('smtp test error', error);
-    return res.status(500).json({error: 'Invio SMTP fallito. Controlla configurazione SMTP.'});
+    return res.status(500).json({ error: 'Invio SMTP fallito. Controlla configurazione SMTP.' });
   }
 });
 
-// ============ USER AUTH ENDPOINTS ============
+// ============ USER AUTH ROUTES ============
 
 app.post('/api/auth/signup', async (req, res) => {
   try {
     const { email, password, fullName } = req.body || {};
 
     if (!email || !password || !fullName) {
-      return res.status(400).json({error: 'Email, password, and full name required'});
+      return res.status(400).json({ error: 'Email, password, and full name required' });
     }
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email.trim())) {
-      return res.status(400).json({error: 'Invalid email format'});
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({error: 'Password must be at least 6 characters'});
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    // Check if user already exists
     const existingUser = await getUserByEmail(email);
     if (existingUser) {
-      return res.status(409).json({error: 'User already exists with this email'});
+      return res.status(409).json({ error: 'User already exists with this email' });
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, bcryptRounds);
 
-    // Create user
     const user = await createUser({
       email: email.toLowerCase().trim(),
       full_name: fullName.trim(),
@@ -944,7 +981,7 @@ app.post('/api/auth/signup', async (req, res) => {
     });
   } catch (error) {
     console.error('[api] POST /api/auth/signup error', error);
-    res.status(500).json({error: 'Internal server error'});
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -953,20 +990,19 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body || {};
 
     if (!email || !password) {
-      return res.status(400).json({error: 'Email and password required'});
+      return res.status(400).json({ error: 'Email and password required' });
     }
 
     const user = await getUserByEmail(email);
     if (!user) {
-      return res.status(401).json({error: 'Invalid email or password'});
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
-      return res.status(401).json({error: 'Invalid email or password'});
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // TODO: Implement JWT token generation
     return res.json({
       message: 'Login successful',
       user: {
@@ -977,27 +1013,17 @@ app.post('/api/auth/login', async (req, res) => {
     });
   } catch (error) {
     console.error('[api] POST /api/auth/login error', error);
-    res.status(500).json({error: 'Internal server error'});
-  }
-});
-
-app.get('/api/auth/me', async (req, res) => {
-  try {
-    // TODO: Validate JWT from Authorization header
-    return res.status(401).json({error: 'Not authenticated'});
-  } catch (error) {
-    console.error('[api] GET /api/auth/me error', error);
-    res.status(500).json({error: 'Internal server error'});
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.get('/api/user/bookings', async (req, res) => {
   try {
-    // TODO: Get user from JWT
-    return res.status(401).json({error: 'Not authenticated'});
+    // TODO: Extract user ID from JWT
+    return res.status(401).json({ error: 'Not authenticated' });
   } catch (error) {
     console.error('[api] GET /api/user/bookings error', error);
-    res.status(500).json({error: 'Internal server error'});
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -1014,11 +1040,7 @@ async function processReminders() {
 
       if (now >= reminderAt && now < bookingStart) {
         try {
-          await sendReminderEmail({
-            ...booking,
-            fullName: booking.full_name,
-            cancelToken: booking.cancel_token,
-          });
+          await sendReminderEmail(booking);
           await updateReminderSent(booking.id);
         } catch (error) {
           console.error('failed to send reminder email for booking', booking.id, error);
@@ -1039,6 +1061,8 @@ setInterval(() => {
 processReminders().catch((error) => {
   console.error('reminder worker bootstrap error', error);
 });
+
+// ============ START SERVER ============
 
 app.listen(port, () => {
   console.log(`Booking server listening on http://localhost:${port}`);
