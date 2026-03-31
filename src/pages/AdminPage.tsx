@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ArrowLeft, LogOut, MailCheck, ShieldCheck} from 'lucide-react';
+import {ArrowLeft, LogOut, ShieldCheck} from 'lucide-react';
 import AdminBookingsPanel from '../components/AdminBookingsPanel';
 import { adminAPI } from '../lib/api';
 
@@ -15,11 +15,6 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [loggedUser, setLoggedUser] = useState('');
   const [authError, setAuthError] = useState('');
-
-  const [smtpTo, setSmtpTo] = useState('');
-  const [smtpMessage, setSmtpMessage] = useState('');
-  const [smtpError, setSmtpError] = useState('');
-  const [smtpLoading, setSmtpLoading] = useState(false);
 
   const checkSession = async () => {
     setCheckingAuth(true);
@@ -68,24 +63,6 @@ export default function AdminPage() {
     setAuthenticated(false);
     setLoggedUser('');
     setPassword('');
-    setSmtpMessage('');
-    setSmtpError('');
-  };
-
-  const sendSmtpTest = async () => {
-    setSmtpError('');
-    setSmtpMessage('');
-    setSmtpLoading(true);
-
-    try {
-      const data = await adminAPI.testSmtp();
-      setSmtpMessage(data.message || 'Email di test inviata');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Errore imprevisto';
-      setSmtpError(message);
-    } finally {
-      setSmtpLoading(false);
-    }
   };
 
   if (checkingAuth) {
@@ -157,35 +134,6 @@ export default function AdminPage() {
           <button onClick={handleLogout} className="px-4 py-2 rounded-lg border border-white/20 hover:border-brand-red/50 text-white/80 text-sm font-bold inline-flex items-center gap-2">
             <LogOut className="w-4 h-4" /> Logout
           </button>
-        </div>
-
-        <div className="glass-card mb-8">
-          <h2 className="text-xl font-black uppercase mb-4 inline-flex items-center gap-2">
-            <MailCheck className="w-5 h-5 text-brand-red" /> Test SMTP reale
-          </h2>
-          <p className="text-sm text-white/50 mb-4">
-            Invia una mail di test per verificare immediatamente che la configurazione SMTP funzioni davvero.
-          </p>
-
-          <div className="flex flex-col md:flex-row gap-3">
-            <input
-              type="email"
-              value={smtpTo}
-              onChange={(event) => setSmtpTo(event.target.value)}
-              placeholder="Destinatario test (es. tuo@email.it)"
-              className="flex-1 rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm outline-none focus:border-brand-red"
-            />
-            <button
-              onClick={sendSmtpTest}
-              disabled={smtpLoading || !smtpTo.trim()}
-              className="px-4 py-2 rounded-lg bg-brand-red text-black font-bold disabled:opacity-50"
-            >
-              {smtpLoading ? 'Invio...' : 'Invia test SMTP'}
-            </button>
-          </div>
-
-          {smtpMessage && <p className="text-green-300 text-sm mt-3">{smtpMessage}</p>}
-          {smtpError && <p className="text-red-300 text-sm mt-3">{smtpError}</p>}
         </div>
 
         <AdminBookingsPanel onSessionExpired={handleLogout} />
