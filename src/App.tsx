@@ -13,6 +13,8 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import BookingActionPage from './pages/BookingActionPage';
+import MusicDepartmentPage from './pages/MusicDepartmentPage';
+import CinemaDepartmentPage from './pages/CinemaDepartmentPage';
 
 // ============ MAIN HOME PAGE ============
 
@@ -63,7 +65,6 @@ function HomePage() {
   const navItems = [
     { label: 'Accademia', href: '#accademia' },
     { label: 'Docenti', href: '#docenti' },
-    { label: 'Corsi', href: '#accademia' },
     { label: 'Workshop', href: '#docenti' },
     { label: 'Sala Prove', href: '#booking' },
   ];
@@ -110,7 +111,25 @@ function HomePage() {
           <div className="hidden md:flex items-center gap-8">
             <a href="#accademia" className="nav-link">Accademia <ChevronDown className="w-4 h-4" /></a>
             <a href="#docenti" className="nav-link">Docenti</a>
-            <a href="#accademia" className="nav-link">Corsi <ChevronDown className="w-4 h-4" /></a>
+            <div className="relative group">
+              <button className="nav-link">
+                Corsi <ChevronDown className="w-4 h-4" />
+              </button>
+              <div className="absolute left-0 top-full mt-2 min-w-[260px] rounded-xl border border-white/10 bg-dark-bg/95 backdrop-blur-md shadow-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-50">
+                <a
+                  href="/corsi/musica"
+                  className="block rounded-lg px-3 py-2 text-sm font-bold text-white/85 hover:bg-white/5 hover:text-brand-red transition-colors"
+                >
+                  Dipartimento Musica
+                </a>
+                <a
+                  href="/corsi/cinema"
+                  className="block rounded-lg px-3 py-2 text-sm font-bold text-white/85 hover:bg-white/5 hover:text-brand-red transition-colors"
+                >
+                  Dipartimento Cinema
+                </a>
+              </div>
+            </div>
             <a href="#docenti" className="nav-link">Workshop <ChevronDown className="w-4 h-4" /></a>
             <a href="#booking" className="nav-link">Sala Prove</a>
           </div>
@@ -174,6 +193,24 @@ function HomePage() {
                   {item.label}
                 </a>
               ))}
+
+              <div className="rounded-lg border border-white/10 bg-white/5 p-2">
+                <p className="px-2 pb-1 text-[11px] uppercase tracking-wider text-white/45 font-bold">Corsi</p>
+                <a
+                  href="/corsi/musica"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                >
+                  Dipartimento Musica
+                </a>
+                <a
+                  href="/corsi/cinema"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                >
+                  Dipartimento Cinema
+                </a>
+              </div>
 
               <div className="h-px bg-white/10 my-1" />
 
@@ -487,6 +524,8 @@ function AppContent() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/corsi/musica" element={<MusicDepartmentPage />} />
+      <Route path="/corsi/cinema" element={<CinemaDepartmentPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/profile" element={<ProfilePage />} />
