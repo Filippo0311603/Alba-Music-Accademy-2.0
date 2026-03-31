@@ -21,6 +21,7 @@ import CinemaDepartmentPage from './pages/CinemaDepartmentPage';
 function HomePage() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isMobileCoursesOpen, setIsMobileCoursesOpen] = React.useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const welcomeAnimatedWords = [
@@ -80,6 +81,7 @@ function HomePage() {
     const onResize = () => {
       if (window.innerWidth >= 768) {
         setIsMobileMenuOpen(false);
+        setIsMobileCoursesOpen(false);
       }
     };
 
@@ -90,6 +92,7 @@ function HomePage() {
   const handleLogout = async () => {
     await logout();
     setIsMobileMenuOpen(false);
+    setIsMobileCoursesOpen(false);
     navigate('/');
   };
 
@@ -171,7 +174,14 @@ function HomePage() {
 
           <button
             type="button"
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            onClick={() => {
+              setIsMobileMenuOpen((prev) => {
+                if (prev) {
+                  setIsMobileCoursesOpen(false);
+                }
+                return !prev;
+              });
+            }}
             className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg border border-white/15 bg-white/5 text-white hover:border-brand-red/50 transition-colors"
             aria-label={isMobileMenuOpen ? 'Chiudi menu navigazione' : 'Apri menu navigazione'}
             aria-expanded={isMobileMenuOpen}
@@ -195,21 +205,40 @@ function HomePage() {
               ))}
 
               <div className="rounded-lg border border-white/10 bg-white/5 p-2">
-                <p className="px-2 pb-1 text-[11px] uppercase tracking-wider text-white/45 font-bold">Corsi</p>
-                <a
-                  href="/corsi/musica"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                <button
+                  type="button"
+                  onClick={() => setIsMobileCoursesOpen((prev) => !prev)}
+                  className="w-full px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors flex items-center justify-between"
+                  aria-expanded={isMobileCoursesOpen}
                 >
-                  Dipartimento Musica
-                </a>
-                <a
-                  href="/corsi/cinema"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
-                >
-                  Dipartimento Cinema
-                </a>
+                  <span>Corsi</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isMobileCoursesOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isMobileCoursesOpen && (
+                  <div className="mt-1 pl-2 border-l border-white/10">
+                    <a
+                      href="/corsi/musica"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsMobileCoursesOpen(false);
+                      }}
+                      className="block px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                    >
+                      Dipartimento Musica
+                    </a>
+                    <a
+                      href="/corsi/cinema"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsMobileCoursesOpen(false);
+                      }}
+                      className="block px-2 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors"
+                    >
+                      Dipartimento Cinema
+                    </a>
+                  </div>
+                )}
               </div>
 
               <div className="h-px bg-white/10 my-1" />
@@ -260,7 +289,7 @@ function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center pt-28 md:pt-36 overflow-hidden">
+      <section className="relative h-screen flex items-center pt-36 md:pt-36 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&q=80&w=2070" 
