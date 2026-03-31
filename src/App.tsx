@@ -57,6 +57,8 @@ function HomePage() {
     "del",
     "settore.",
   ];
+  const welcomeTitleLineOneWords = ["Benvenuti", "in", "Accademia:"];
+  const welcomeTitleLineTwoWords = ["l'identità,", "il", "metodo,", "la", "visione."];
 
   React.useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 24);
@@ -192,10 +194,48 @@ function HomePage() {
       <section className="py-24 bg-dark-bg relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-4xl mx-auto">
-            <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight uppercase">
-              Benvenuti in Accademia: <br />
-              <span className="text-white/40 italic">l'identità, il metodo, la visione.</span>
-            </h2>
+            <motion.h2
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.45 }}
+              variants={{
+                hidden: {},
+                visible: {
+                  transition: {
+                    staggerChildren: 0.08,
+                  },
+                },
+              }}
+              className="text-4xl md:text-6xl font-black mb-8 leading-tight uppercase"
+            >
+              {welcomeTitleLineOneWords.map((word, index) => (
+                <motion.span
+                  key={`title-line-1-${word}-${index}`}
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.28 } },
+                  }}
+                  className="inline-block mr-3"
+                >
+                  {word}
+                </motion.span>
+              ))}
+              <br />
+              <span className="text-white/40 italic">
+                {welcomeTitleLineTwoWords.map((word, index) => (
+                  <motion.span
+                    key={`title-line-2-${word}-${index}`}
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.28 } },
+                    }}
+                    className="inline-block mr-3"
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </span>
+            </motion.h2>
             <div className="w-20 h-1 bg-brand-red mx-auto mb-12" />
             <motion.p
               initial="hidden"
