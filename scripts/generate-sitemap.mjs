@@ -8,6 +8,7 @@ const publicRoutes = [
   { path: '/', changefreq: 'weekly', priority: '1.0' },
   { path: '/chi-siamo', changefreq: 'monthly', priority: '0.8' },
   { path: '/la-sede', changefreq: 'monthly', priority: '0.8' },
+  { path: '/le-nostre-sale', changefreq: 'weekly', priority: '0.9' },
   { path: '/corsi/musica', changefreq: 'weekly', priority: '0.9' },
   { path: '/corsi/cinema', changefreq: 'weekly', priority: '0.9' },
 ];

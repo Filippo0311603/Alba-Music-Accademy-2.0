@@ -74,6 +74,7 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
           </div>
 
           <div className="hidden md:flex items-center gap-8">
+            <a href="/" className="nav-link">Home</a>
             
             {/* DROPDOWN ACCADEMIA */}
             <div className="relative" ref={desktopAcademyDropdownRef}>
@@ -105,6 +106,8 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
                 </div>
               )}
             </div>
+
+            <a href="/le-nostre-sale" className="nav-link">Le Nostre Sale</a>
 
             <a href="/#docenti" className="nav-link">Docenti</a>
             
@@ -180,6 +183,7 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-white/10 bg-dark-bg/95 backdrop-blur-md max-h-[calc(100vh-64px)] overflow-y-auto">
             <div className="px-6 py-4 flex flex-col gap-3">
+              <a href="/" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors">Home</a>
               
               {/* ACCADEMIA GROUP MOBILE */}
               <div className="rounded-lg border border-white/10 bg-white/5 p-2">
@@ -218,6 +222,8 @@ export default function SiteLayout({ children }: SiteLayoutProps) {
                   </div>
                 )}
               </div>
+
+              <a href="/le-nostre-sale" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors">Le Nostre Sale</a>
 
               <a href="/#docenti" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors">Docenti</a>
 

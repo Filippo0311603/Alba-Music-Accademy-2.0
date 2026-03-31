@@ -18,6 +18,7 @@ const MusicDepartmentPage = React.lazy(() => import('./pages/MusicDepartmentPage
 const CinemaDepartmentPage = React.lazy(() => import('./pages/CinemaDepartmentPage'));
 const ChiSiamoPage = React.lazy(() => import('./pages/ChiSiamoPage'));
 const LaSedePage = React.lazy(() => import('./pages/LaSedePage'));
+const LeNostreSalePage = React.lazy(() => import('./pages/LeNostreSalePage'));
 
 // ============ MAIN HOME PAGE ============
 
@@ -156,6 +157,7 @@ function HomePage() {
           </div>
 
           <div className="hidden md:flex items-center gap-8">
+            <a href="/" className="nav-link">Home</a>
             <div className="relative" ref={desktopAcademyDropdownRef}>
               <button
                 type="button"
@@ -185,6 +187,7 @@ function HomePage() {
                 </div>
               )}
             </div>
+            <a href="/le-nostre-sale" className="nav-link">Le Nostre Sale</a>
             <a href="#docenti" className="nav-link">Docenti</a>
             <div className="relative group">
               <button className="nav-link">
@@ -266,6 +269,8 @@ function HomePage() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-white/10 bg-dark-bg/95 backdrop-blur-md">
             <div className="px-6 py-4 flex flex-col gap-3">
+              <a href="/" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors">Home</a>
+
               <div className="rounded-lg border border-white/10 bg-white/5 p-2">
                 <button
                   type="button"
@@ -302,6 +307,8 @@ function HomePage() {
                   </div>
                 )}
               </div>
+
+              <a href="/le-nostre-sale" onClick={() => setIsMobileMenuOpen(false)} className="px-3 py-2 rounded-lg text-white/85 font-bold text-sm hover:bg-white/5 hover:text-brand-red transition-colors">Le Nostre Sale</a>
 
               {navItems.map((item) => (
                 <a
@@ -416,7 +423,7 @@ function HomePage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="max-w-4xl"
           >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.06] md:leading-[0.95] mb-8 uppercase max-w-5xl">
+            <h1 className="text-5xl sm:text-6xl md:text-6xl lg:text-7xl font-black leading-[1.04] md:leading-[0.95] mb-8 uppercase max-w-5xl">
               Formazione d'eccellenza <br />
               per le <span className="text-brand-red">arti dello spettacolo</span>
             </h1>
@@ -653,6 +660,7 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/chi-siamo" element={<ChiSiamoPage />} />
         <Route path="/la-sede" element={<LaSedePage />} />
+        <Route path="/le-nostre-sale" element={<LeNostreSalePage />} />
         <Route path="/corsi/musica" element={<MusicDepartmentPage />} />
         <Route path="/corsi/cinema" element={<CinemaDepartmentPage />} />
         <Route path="/signup" element={<SignupPage />} />

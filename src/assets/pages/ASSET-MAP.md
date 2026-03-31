@@ -50,6 +50,13 @@ Cartella: corsi-cinema
 - cinema-plan-montaggio.webp
 - cinema-plan-materiali.webp
 
+## Le Nostre Sale (src/pages/LeNostreSalePage.tsx)
+Cartella: le-nostre-sale
+- sale-hero-bg.webp
+- sala-pulse.webp
+- sala-groove.webp
+- sala-stage-pro.webp
+
 ## Auth / Profile / Admin / Booking Actions
 Cartelle: auth, profile, admin, booking-actions
 - Riservate per immagini future (banner, illustrazioni, stati vuoti, icone sezione).
