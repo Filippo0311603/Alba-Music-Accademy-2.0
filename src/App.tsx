@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Music, Users, BookOpen, Mic2 } from 'lucide-react';
+import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Music, Users, Mic2 } from 'lucide-react';
 import academyLogo from './assets/logo/logo_accademia.png';
 
 import { AuthProvider, useAuth } from './lib/auth-context';
@@ -20,6 +20,43 @@ function HomePage() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const welcomeAnimatedWords = [
+    "Alba",
+    "Music",
+    "Academy",
+    "e",
+    "una",
+    "scuola",
+    "di",
+    "riferimento,",
+    "apprezzata",
+    "in",
+    "Italia",
+    "e",
+    "all'estero",
+    "da",
+    "chi",
+    "vuole",
+    "fare",
+    "Musica.",
+    "Il",
+    "nostro",
+    "metodo",
+    "si",
+    "basa",
+    "sulla",
+    "pratica",
+    "costante",
+    "e",
+    "sul",
+    "confronto",
+    "con",
+    "i",
+    "migliori",
+    "professionisti",
+    "del",
+    "settore.",
+  ];
 
   React.useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 24);
@@ -151,38 +188,41 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Welcome Section */}
       <section className="py-24 bg-dark-bg relative z-10">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
-            {[
-              { label: "Anni di esperienza", value: "20", icon: Music },        
-              { label: "Docenti professionisti", value: "45", icon: Users },    
-              { label: "Studenti formati", value: "12.000", icon: BookOpen },   
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-card flex flex-col items-start gap-4 group hover:border-brand-red/50 transition-colors"
-              >
-                <span className="text-5xl font-black text-white group-hover:text-brand-red transition-colors">{stat.value}</span>
-                <span className="text-sm text-white/40 uppercase tracking-widest font-bold">{stat.label}</span>
-              </motion.div>
-            ))}
-          </div>
-
           <div className="text-center max-w-4xl mx-auto">
             <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight uppercase">
               Benvenuti in Accademia: <br />
               <span className="text-white/40 italic">l'identità, il metodo, la visione.</span>
             </h2>
             <div className="w-20 h-1 bg-brand-red mx-auto mb-12" />
-            <p className="text-xl text-white/60 leading-relaxed">
-              Alba Music Academy è una scuola di riferimento, apprezzata in Italia e all'estero da chi vuole fare Musica. Il nostro metodo si basa sulla pratica costante e sul confronto con i migliori professionisti del settore.
-            </p>
+            <motion.p
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.4 }}
+              className="text-xl text-white/60 leading-relaxed"
+            >
+              {welcomeAnimatedWords.map((word, index) => (
+                <motion.span
+                  key={`${word}-${index}`}
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: {
+                        duration: 0.28,
+                        delay: index * 0.04,
+                      },
+                    },
+                  }}
+                  className="inline-block mr-1.5"
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </motion.p>
           </div>
         </div>
       </section>

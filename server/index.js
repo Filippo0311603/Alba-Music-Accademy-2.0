@@ -20,6 +20,7 @@ import {
   getUserById,
   createUser,
   getUserBookings,
+  getUserBookingById,
   markUserEmailVerified,
   updateConfirmationSent,
 } from './lib/supabase-client.js';
@@ -1210,6 +1211,36 @@ app.get('/api/user/bookings', requireUserAuth, async (req, res) => {
   } catch (error) {
     console.error('[api] GET /api/user/bookings error', error);
     res.status(500).json({error: 'Internal server error'});
+  }
+});
+
+app.post('/api/user/bookings/:id/cancel', requireUserAuth, async (req, res) => {
+  try {
+    const bookingId = String(req.params?.id || '').trim();
+    if (!bookingId) {
+      return res.status(400).json({error: 'booking id is required'});
+    }
+
+    const booking = await getUserBookingById(req.authUser.id, bookingId);
+    if (!booking) {
+      return res.status(404).json({error: 'booking not found'});
+    }
+
+    if (booking.status === 'cancelled') {
+      return res.json({message: 'La prenotazione risulta gia disdetta', booking});
+    }
+
+    const updatedBooking = await updateBookingStatus(booking.id, 'cancelled', {
+      canceled_at: new Date().toISOString(),
+    });
+
+    return res.json({
+      message: 'Prenotazione disdetta con successo',
+      booking: updatedBooking,
+    });
+  } catch (error) {
+    console.error('[api] POST /api/user/bookings/:id/cancel error', error);
+    return res.status(500).json({error: 'Internal server error'});
   }
 });
 

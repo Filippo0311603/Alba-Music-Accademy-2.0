@@ -69,6 +69,14 @@ export const bookingAPI = {
       },
     }),
 
+  cancelMyBooking: (bookingId: string) =>
+    apiCall(`/api/user/bookings/${bookingId}/cancel`, {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+      },
+    }),
+
   getMyProfile: () =>
     apiCall('/api/auth/me', {
       headers: {

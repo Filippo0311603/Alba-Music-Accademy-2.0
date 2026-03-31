@@ -251,3 +251,18 @@ export async function getUserBookings(userId) {
   if (error) throw error;
   return data || [];
 }
+
+/**
+ * Gets a single booking by id for a specific user
+ */
+export async function getUserBookingById(userId, bookingId) {
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('id', bookingId)
+    .eq('user_id', userId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return data || null;
+}

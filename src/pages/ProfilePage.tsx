@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [cancelingBookingId, setCancelingBookingId] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -62,6 +63,32 @@ export default function ProfilePage() {
       navigate('/');
     } catch (err) {
       console.error('Logout error:', err);
+    }
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    setError('');
+    setCancelingBookingId(bookingId);
+
+    try {
+      const data = await bookingAPI.cancelMyBooking(bookingId);
+      const canceledAt = data?.booking?.canceled_at || new Date().toISOString();
+
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking.id === bookingId
+            ? {
+                ...booking,
+                status: 'cancelled',
+                canceled_at: canceledAt,
+              }
+            : booking,
+        ),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Impossibile disdire la prenotazione.');
+    } finally {
+      setCancelingBookingId(null);
     }
   };
 
@@ -211,6 +238,18 @@ export default function ProfilePage() {
                       {getStatusLabel(booking.status)}
                     </span>
                   </div>
+
+                  {booking.status !== 'cancelled' && (
+                    <div className="mb-4">
+                      <button
+                        onClick={() => handleCancelBooking(booking.id)}
+                        disabled={cancelingBookingId === booking.id}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-red-300/40 text-red-300 text-xs font-bold uppercase tracking-wider hover:bg-red-300/10 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {cancelingBookingId === booking.id ? 'Disdetta in corso...' : 'Disdici prenotazione'}
+                      </button>
+                    </div>
+                  )}
 
                   {/* Booking Details Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
