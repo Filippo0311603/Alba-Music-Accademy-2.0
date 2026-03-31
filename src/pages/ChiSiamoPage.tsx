@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Target, Heart, Award, Sparkles, ArrowRight } from 'lucide-react';
 import SiteLayout from '../components/SiteLayout';
 import SeoMeta from '../components/SeoMeta';
-import sectionUnaFamigliaImage from '../assets/pages/chi-siamo/sezione-una-famiglia.webp';
+import sectionUnaFamigliaImage from '../assets/pages/chi-siamo/sezione-una-famiglia-optimized.webp';
 
 // Array per la sezione delle bolle fluttuanti
 const floatingRoles = [

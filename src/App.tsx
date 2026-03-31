@@ -416,20 +416,20 @@ function HomePage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="max-w-4xl"
           >
-            <h1 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.08] md:leading-[0.95] mb-8 uppercase max-w-5xl">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.06] md:leading-[0.95] mb-8 uppercase max-w-5xl">
               Formazione d'eccellenza <br />
               per le <span className="text-brand-red">arti dello spettacolo</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-white/60 max-w-xl mb-10 md:mb-12">
+            <p className="text-lg sm:text-lg md:text-xl text-white/60 max-w-xl mb-10 md:mb-12">
               Da oltre 20 anni formiamo i talenti del domani. Unisciti alla nostra accademia e trasforma la tua passione in professione.
             </p>
             
             <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
               <button 
                 onClick={() => navigate('/signup')}
-                className="w-24 h-24 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-full bg-brand-red flex flex-col items-center justify-center gap-1 sm:gap-2 font-bold text-[11px] sm:text-sm md:text-base hover:scale-105 md:hover:scale-110 transition-transform group"
+                className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-full bg-brand-red flex flex-col items-center justify-center gap-2 font-bold text-sm md:text-base hover:scale-105 md:hover:scale-110 transition-transform group"
               >
-                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 <span>Scopri di più</span>
               </button>
             </div>

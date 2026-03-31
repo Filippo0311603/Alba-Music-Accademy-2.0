@@ -13,7 +13,7 @@ Cartella: home
 ## Chi Siamo (src/pages/ChiSiamoPage.tsx)
 Cartella: chi-siamo
 - chi-siamo-hero-bg.webp
-- chi-siamo-visione.webp
+- sezione-una-famiglia-optimized.webp
 
 ## La Sede (src/pages/LaSedePage.tsx)
 Cartella: la-sede
