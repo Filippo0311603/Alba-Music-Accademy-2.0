@@ -323,24 +323,6 @@ function HomePage() {
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 <span>Scopri di più</span>
               </button>
-              
-              <div className="flex items-center gap-4">
-                <div className="flex -space-x-4">
-                  {[1,2,3,4].map(i => (
-                    <img 
-                      key={i}
-                      src={`https://i.pravatar.cc/100?img=${i+10}`} 
-                      className="w-12 h-12 rounded-full border-2 border-dark-bg"
-                      alt="Student"
-                      referrerPolicy="no-referrer"
-                    />
-                  ))}
-                </div>
-                <div>
-                  <p className="font-bold">+500 Studenti</p>
-                  <p className="text-sm text-white/50">Soddisfatti in Italia</p>
-                </div>
-              </div>
             </div>
           </motion.div>
         </div>
