@@ -182,12 +182,12 @@ export default function CinemaDepartmentPage() {
             <div className="mb-20 flex flex-col lg:flex-row lg:items-end justify-between gap-8 relative z-10 border-b border-white/[0.05] pb-10">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-red mb-4">I Percorsi</p>
-                <h2 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">
+                <h2 className="text-4xl sm:text-5xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">
                   Corsi <br />
                   <span className="text-white">Principali</span>
                 </h2>
               </div>
-              <p className="text-lg text-white/40 max-w-md font-medium text-right hidden lg:block">
+              <p className="text-sm md:text-base lg:text-lg text-white/40 max-w-md font-medium text-left lg:text-right block">
                 Recitazione, doppiaggio, e padronanza del mezzo visivo. Scegli il tuo ruolo sul set.
               </p>
             </div>
@@ -200,20 +200,20 @@ export default function CinemaDepartmentPage() {
                   whileInView={{ opacity: 1, y: 0 }} 
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ delay: i * 0.1 }}
-                  className={`${course.colSpan} group relative overflow-hidden rounded-[2rem] border border-white/[0.05] ${course.bgClass || 'bg-[#050505]'} ${course.tall ? 'aspect-[4/3] md:aspect-[21/9] md:min-h-[500px]' : 'aspect-square md:aspect-auto md:min-h-[400px]'} flex flex-col justify-end p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_0_50px_rgba(97,222,227,0.1)] transition-all duration-700`}
+                  className={`${course.colSpan} group relative overflow-hidden rounded-[2rem] border border-white/[0.05] ${course.bgClass || 'bg-[#050505]'} ${course.tall ? 'aspect-[5/4] md:aspect-[21/9] md:min-h-[500px]' : 'aspect-square md:aspect-auto md:min-h-[400px]'} flex flex-col justify-end p-6 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_0_50px_rgba(97,222,227,0.1)] active:shadow-[0_0_50px_rgba(97,222,227,0.1)] transition-all duration-700`}
                 >
                   {course.image && (
                     <>
                       <img 
                         src={course.image} 
                         alt={course.title} 
-                        className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale contrast-150 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[3s] ease-out"
+                        className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale contrast-150 group-hover:grayscale-0 group-hover:scale-110 group-active:grayscale-0 group-active:scale-110 transition-all duration-[3s] ease-out"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/80 to-transparent transition-opacity duration-500" />
                     </>
                   )}
                   
-                  <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute top-6 right-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500">
                     <span className="text-[8px] font-black text-brand-red tracking-[0.4em] uppercase">Mod. {i+1}</span>
                   </div>
 
@@ -230,7 +230,7 @@ export default function CinemaDepartmentPage() {
                       <p className="text-brand-red font-black uppercase tracking-widest text-[9px] mb-6">
                         {course.subtitle}
                       </p>
-                      <p className={`text-base font-medium leading-relaxed max-w-xl ${course.image ? 'text-white/50 group-hover:text-white/80' : 'text-white/40 group-hover:text-white/70'} transition-colors duration-500`}>
+                      <p className={`text-base font-medium leading-relaxed max-w-xl ${course.image ? 'text-white/70 md:text-white/50 md:group-hover:text-white/80' : 'text-white/70 md:text-white/40 md:group-hover:text-white/70'} transition-colors duration-500`}>
                         {course.description}
                       </p>
                     </div>
@@ -251,7 +251,7 @@ export default function CinemaDepartmentPage() {
             </div>
 
             <div className="relative z-10 mb-20 text-center md:text-left">
-              <h2 className="text-6xl md:text-7xl font-black uppercase mb-6 tracking-tighter">Competenze <br className="md:hidden"/><span className="text-brand-red">Tecniche</span></h2>
+              <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase mb-6 tracking-tighter">Competenze <br className="md:hidden"/><span className="text-brand-red">Tecniche</span></h2>
               <div className="w-12 h-1 bg-brand-red mb-6 mx-auto md:mx-0" />
               <p className="text-lg text-white/60 leading-relaxed max-w-2xl mx-auto md:mx-0 font-medium">
                 I laboratori orizzontali fondamentali per padroneggiare il mezzo tecnico: dalla luce al montaggio, per un controllo totale sull'immagine.
@@ -266,28 +266,27 @@ export default function CinemaDepartmentPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.15 }}
-                  style={{ marginTop: i % 2 === 0 ? '0px' : '80px' }}
-                  className="group relative overflow-hidden rounded-[2rem] aspect-[4/3] lg:aspect-[16/9] border border-white/[0.03] bg-[#050505] shadow-[0_30px_80px_rgba(0,0,0,0.8)]"
+                  className={`group relative overflow-hidden rounded-[2rem] aspect-[4/3] lg:aspect-[16/9] border border-white/[0.03] bg-[#050505] shadow-[0_30px_80px_rgba(0,0,0,0.8)] ${i % 2 === 0 ? 'lg:mt-0' : 'lg:mt-20'}`}
                 >
                   <img
                     src={track.image}
                     alt={track.title}
-                    className="absolute inset-0 w-full h-full object-cover grayscale opacity-30 contrast-200 group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-[2s] ease-out group-hover:scale-110"
+                    className="absolute inset-0 w-full h-full object-cover grayscale opacity-40 md:opacity-30 contrast-200 group-hover:grayscale-0 group-hover:opacity-60 group-active:grayscale-0 group-active:opacity-60 transition-all duration-[2s] ease-out group-hover:scale-110 group-active:scale-110"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/60 to-transparent" />
                   
-                  <div className="absolute top-6 left-6 text-6xl font-black text-white/[0.03] group-hover:text-brand-red/10 transition-colors duration-700 pointer-events-none select-none">
+                  <div className="absolute top-6 left-6 text-6xl font-black text-white/[0.06] md:text-white/[0.03] group-hover:text-brand-red/10 group-active:text-brand-red/10 transition-colors duration-700 pointer-events-none select-none">
                     0{i + 1}
                   </div>
                   
                   <div className="absolute inset-0 p-8 flex flex-col justify-end z-10">
-                    <div className="w-8 h-px bg-brand-red mb-6 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-                    <track.icon className="w-8 h-8 text-brand-red mb-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="w-8 h-px bg-brand-red mb-6 transform translate-x-0 md:-translate-x-full md:group-hover:translate-x-0 transition-transform duration-500" />
+                    <track.icon className="w-8 h-8 text-brand-red mb-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
                     <h3 className="text-3xl font-black uppercase mb-3 text-white leading-[0.9] tracking-tighter">
                       {track.title}
                     </h3>
-                    <p className="text-sm text-white/50 leading-relaxed font-medium max-w-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                    <p className="text-sm text-white/60 md:text-white/50 leading-relaxed font-medium max-w-sm opacity-100 md:opacity-0 transform translate-y-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-500 ease-out">
                       {track.description}
                     </p>
                   </div>
@@ -300,7 +299,7 @@ export default function CinemaDepartmentPage() {
               PIANO DIDATTICO: EDITORIAL SCROLL
               ======================================================== */}
           <section>
-            <h2 className="text-6xl md:text-7xl font-black uppercase mb-16 tracking-tighter text-center md:text-left">Piano <span className="text-brand-red">Didattico</span></h2>
+            <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase mb-16 tracking-tighter text-center md:text-left">Piano <span className="text-brand-red">Didattico</span></h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {cinemaPlan.map((block, i) => (
@@ -315,19 +314,19 @@ export default function CinemaDepartmentPage() {
                   <img
                     src={block.image}
                     alt={block.title}
-                    className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale contrast-125 group-hover:grayscale-0 group-hover:opacity-70 transition-all duration-[2s] ease-out group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover opacity-35 md:opacity-30 grayscale contrast-125 group-hover:grayscale-0 group-hover:opacity-70 group-active:grayscale-0 group-active:opacity-70 transition-all duration-[2s] ease-out group-hover:scale-105 group-active:scale-105"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/40 to-transparent" />
                   
-                  <div className="absolute top-6 right-6 text-4xl font-black text-white/10 group-hover:text-brand-red/20 transition-colors duration-500">
+                  <div className="absolute top-6 right-6 text-4xl font-black text-white/20 md:text-white/10 group-hover:text-brand-red/20 group-active:text-brand-red/20 transition-colors duration-500">
                     P.0{i + 1}
                   </div>
 
                   <div className="absolute inset-0 p-8 flex flex-col justify-end">
                     <h3 className="text-2xl font-black uppercase mb-3 leading-none text-white tracking-tight">{block.title}</h3>
-                    <div className="h-0 group-hover:h-auto overflow-hidden transition-all duration-500">
-                      <p className="text-sm text-white/60 font-medium transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100">{block.description}</p>
+                    <div className="h-auto md:h-0 md:group-hover:h-auto overflow-hidden transition-all duration-500">
+                      <p className="text-sm text-white/70 md:text-white/60 font-medium transform translate-y-0 md:translate-y-4 opacity-100 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 transition-all duration-500 delay-100">{block.description}</p>
                     </div>
                   </div>
                 </motion.article>

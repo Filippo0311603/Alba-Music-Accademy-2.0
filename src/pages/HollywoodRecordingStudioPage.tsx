@@ -177,7 +177,7 @@ export default function HollywoodRecordingStudioPage() {
               <section className="py-24 relative z-30">
                 <div className="mb-20 flex flex-col items-center">
                   <div className="w-px h-24 bg-gradient-to-b from-transparent via-brand-red to-transparent mb-8" />
-                  <h2 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight text-center">
+                  <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight text-center">
                     Il Nostro <br/> <span className="text-brand-red">Workflow</span>
                   </h2>
                 </div>
@@ -186,12 +186,12 @@ export default function HollywoodRecordingStudioPage() {
                   {/* Pillar 1 */}
                   <motion.div 
                     initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                    className="group relative overflow-hidden rounded-[2.5rem] bg-[#080808] border border-white/5 p-10 min-h-[450px] flex flex-col justify-end transition-all duration-700 hover:border-brand-red/30 hover:bg-[#0a0a0a]"
+                    className="group relative overflow-hidden rounded-[2.5rem] bg-[#080808] border border-white/5 p-8 md:p-10 min-h-[360px] md:min-h-[450px] flex flex-col justify-end transition-all duration-700 hover:border-brand-red/30 active:border-brand-red/30 hover:bg-[#0a0a0a] active:bg-[#0a0a0a]"
                   >
-                    <div className="absolute top-4 right-4 text-[150px] font-black leading-none text-transparent stroke-text select-none group-hover:-translate-y-4 group-hover:translate-x-4 transition-transform duration-700" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.05)' }}>
+                    <div className="absolute top-4 right-4 text-[90px] md:text-[150px] font-black leading-none text-transparent stroke-text select-none group-hover:-translate-y-4 group-hover:translate-x-4 group-active:-translate-y-4 group-active:translate-x-4 transition-transform duration-700" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.05)' }}>
                       01
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-brand-red/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-red/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-700" />
                     
                     <div className="relative z-10">
                       <h3 className="text-3xl font-black uppercase mb-4 text-white">Setup Rapido</h3>
@@ -204,12 +204,12 @@ export default function HollywoodRecordingStudioPage() {
                   {/* Pillar 2 */}
                   <motion.div 
                     initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
-                    className="group relative overflow-hidden rounded-[2.5rem] bg-[#080808] border border-white/5 p-10 min-h-[450px] flex flex-col justify-end transition-all duration-700 hover:border-brand-red/30 hover:bg-[#0a0a0a] lg:-translate-y-8"
+                    className="group relative overflow-hidden rounded-[2.5rem] bg-[#080808] border border-white/5 p-8 md:p-10 min-h-[360px] md:min-h-[450px] flex flex-col justify-end transition-all duration-700 hover:border-brand-red/30 active:border-brand-red/30 hover:bg-[#0a0a0a] active:bg-[#0a0a0a] lg:-translate-y-8"
                   >
-                    <div className="absolute top-4 right-4 text-[150px] font-black leading-none text-transparent stroke-text select-none group-hover:-translate-y-4 group-hover:translate-x-4 transition-transform duration-700" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.05)' }}>
+                    <div className="absolute top-4 right-4 text-[90px] md:text-[150px] font-black leading-none text-transparent stroke-text select-none group-hover:-translate-y-4 group-hover:translate-x-4 group-active:-translate-y-4 group-active:translate-x-4 transition-transform duration-700" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.05)' }}>
                       02
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-brand-red/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-red/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-700" />
                     
                     <div className="relative z-10">
                       <h3 className="text-3xl font-black uppercase mb-4 text-white">Standard Industry</h3>
@@ -222,12 +222,12 @@ export default function HollywoodRecordingStudioPage() {
                   {/* Pillar 3 */}
                   <motion.div 
                     initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
-                    className="group relative overflow-hidden rounded-[2.5rem] bg-[#080808] border border-white/5 p-10 min-h-[450px] flex flex-col justify-end transition-all duration-700 hover:border-brand-red/30 hover:bg-[#0a0a0a] lg:-translate-y-16"
+                    className="group relative overflow-hidden rounded-[2.5rem] bg-[#080808] border border-white/5 p-8 md:p-10 min-h-[360px] md:min-h-[450px] flex flex-col justify-end transition-all duration-700 hover:border-brand-red/30 active:border-brand-red/30 hover:bg-[#0a0a0a] active:bg-[#0a0a0a] lg:-translate-y-16"
                   >
-                    <div className="absolute top-4 right-4 text-[150px] font-black leading-none text-transparent stroke-text select-none group-hover:-translate-y-4 group-hover:translate-x-4 transition-transform duration-700" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.05)' }}>
+                    <div className="absolute top-4 right-4 text-[90px] md:text-[150px] font-black leading-none text-transparent stroke-text select-none group-hover:-translate-y-4 group-hover:translate-x-4 group-active:-translate-y-4 group-active:translate-x-4 transition-transform duration-700" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.05)' }}>
                       03
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-brand-red/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-red/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-700" />
                     
                     <div className="relative z-10">
                       <h3 className="text-3xl font-black uppercase mb-4 text-white">Su Misura</h3>
@@ -242,9 +242,9 @@ export default function HollywoodRecordingStudioPage() {
               {/* ========================================================
                   CINEMATIC STUDIO GALLERY (Scorrimento Asincrono)
                   ======================================================== */}
-              <section className="py-32 relative overflow-hidden">
-                <div className="mb-16 text-center">
-                  <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-white/20 select-none">
+              <section className="py-24 md:py-32 relative overflow-hidden">
+                <div className="mb-12 md:mb-16 text-center">
+                  <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tight text-white/20 select-none">
                     The <span className="text-brand-red/50">Gallery</span>
                   </h2>
                 </div>
@@ -256,32 +256,32 @@ export default function HollywoodRecordingStudioPage() {
                       <img 
                         src={hollywoodPostaz}
                         alt="Console analogica" 
-                        className="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-[2s]"
+                        className="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-active:grayscale-0 group-active:opacity-100 transition-all duration-[2s]"
                       />
                     </div>
                     <div className="relative aspect-square rounded-[3rem] overflow-hidden border border-white/10 group">
                       <img 
                         src={fotoAttrezzDj}
                         alt="Microfoni studio" 
-                        className="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-[2s]"
+                        className="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-active:grayscale-0 group-active:opacity-100 transition-all duration-[2s]"
                       />
                     </div>
                   </motion.div>
 
                   {/* Colonna Destra - Si muove verso il basso (ritardo visuale) */}
-                  <motion.div style={{ y: yGalleryRight }} className="space-y-6 hidden md:block">
+                  <motion.div style={{ y: yGalleryRight }} className="space-y-6">
                     <div className="relative aspect-square rounded-[3rem] overflow-hidden border border-white/10 group">
                       <img 
                         src={hollywodPostazione}
                         alt="Strumenti" 
-                        className="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-[2s]"
+                        className="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-active:grayscale-0 group-active:opacity-100 transition-all duration-[2s]"
                       />
                     </div>
                     <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 group">
                       <img 
                         src={hollywoodStudioOptimized}
                         alt="Control Room" 
-                        className="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-[2s]"
+                        className="absolute inset-0 w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-active:grayscale-0 group-active:opacity-100 transition-all duration-[2s]"
                       />
                     </div>
                   </motion.div>
@@ -291,7 +291,7 @@ export default function HollywoodRecordingStudioPage() {
               {/* ========================================================
                   CTA GIGANTE: IMMERSIVE BOOKING
                   ======================================================== */}
-              <section className="pt-20 pb-10">
+              <section className="pt-16 md:pt-20 pb-10">
                 <motion.div 
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -306,10 +306,10 @@ export default function HollywoodRecordingStudioPage() {
                       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-red/30 bg-brand-red/10 text-brand-red text-[10px] font-black uppercase tracking-[0.2em] mb-8">
                         <PhoneCall className="w-3 h-3" /> Booking Diretto
                       </div>
-                      <h2 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight mb-8">
+                      <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight mb-6 md:mb-8">
                         Prenota la tua <br/> <span className="text-brand-red">Sessione.</span>
                       </h2>
-                      <p className="text-white/50 text-xl md:text-2xl font-medium leading-relaxed">
+                      <p className="text-white/50 text-base sm:text-lg md:text-2xl font-medium leading-relaxed">
                         La prenotazione dello studio va concordata direttamente con la segreteria. Analizzeremo il tuo progetto e assegneremo il sound engineer perfetto per le tue esigenze.
                       </p>
                     </div>

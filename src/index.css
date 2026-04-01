@@ -10,8 +10,13 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-dark-bg text-white antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -25,5 +30,58 @@
 
 .nav-link {
   @apply text-sm font-medium hover:text-brand-red transition-colors flex items-center gap-1;
+}
+
+@media (hover: none), (pointer: coarse) {
+  [class*="duration-500"] {
+    transition-duration: 420ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [class*="duration-700"] {
+    transition-duration: 560ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [class*="duration-[2s]"] {
+    transition-duration: 1300ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [class*="duration-[2.5s]"] {
+    transition-duration: 1550ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [class*="duration-[3s]"] {
+    transition-duration: 1750ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .group:active .group-hover\:opacity-100 {
+    opacity: 1;
+  }
+
+  .group:active .group-hover\:translate-y-0 {
+    transform: translateY(0);
+  }
+
+  .group:active .group-hover\:translate-x-0 {
+    transform: translateX(0);
+  }
+
+  .group:active .group-hover\:scale-105,
+  .group:active .group-hover\:scale-110 {
+    transform: scale(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 

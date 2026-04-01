@@ -75,6 +75,7 @@ const TeacherCard: React.FC<TeacherCardProps> = ({ teacher, index }) => {
 
 function HomePage() {
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [isTouchViewport, setIsTouchViewport] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isMobileAcademyOpen, setIsMobileAcademyOpen] = React.useState(false);
   const [isMobileCoursesOpen, setIsMobileCoursesOpen] = React.useState(false);
@@ -86,9 +87,9 @@ function HomePage() {
   // Parallax Hero
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const yBg = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-  const yText = useTransform(scrollYProgress, [0, 1], ['0%', '100px']);
-  const opacityText = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const yBg = useTransform(scrollYProgress, [0, 1], isTouchViewport ? ['0%', '14%'] : ['0%', '30%']);
+  const yText = useTransform(scrollYProgress, [0, 1], isTouchViewport ? ['0%', '36px'] : ['0%', '100px']);
+  const opacityText = useTransform(scrollYProgress, [0, 1], isTouchViewport ? [1, 0.18] : [1, 0]);
 
   const welcomeAnimatedWords = [
     "Alba", "Music", "Academy", "e", "una", "scuola", "di", "riferimento,",
@@ -122,6 +123,14 @@ function HomePage() {
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 1023px), (hover: none), (pointer: coarse)');
+    const applyViewportMode = () => setIsTouchViewport(mediaQuery.matches);
+    applyViewportMode();
+    mediaQuery.addEventListener('change', applyViewportMode);
+    return () => mediaQuery.removeEventListener('change', applyViewportMode);
   }, []);
 
   React.useEffect(() => {
@@ -176,13 +185,13 @@ function HomePage() {
           ======================================================== */}
       <nav className="fixed top-0 w-full z-50 transition-all duration-500">
         <div className={`absolute inset-0 transition-opacity duration-500 ${isScrolled ? 'opacity-100 bg-[#030303]/70 backdrop-blur-3xl border-b border-white/5' : 'opacity-0'}`} />
-        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between relative z-10 transition-all duration-500 ${isScrolled ? 'h-16 md:h-20' : 'h-24 md:h-32'}`}>
+        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between relative z-10 transition-all duration-500 ${isScrolled ? 'h-16 md:h-20' : 'h-20 md:h-32'}`}>
           <div className="flex items-center min-w-0">
             <a href="/" className="inline-flex items-center">
               <img
                 src={academyLogo}
                 alt="Logo Alba Music Academy"
-                className={`w-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] transition-all duration-500 ${isScrolled ? 'h-10 md:h-12 max-w-[170px] md:max-w-[280px]' : 'h-14 md:h-20 max-w-[230px] md:max-w-[360px]'}`}
+                className={`w-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] transition-all duration-500 ${isScrolled ? 'h-10 md:h-12 max-w-[170px] md:max-w-[280px]' : 'h-12 md:h-20 max-w-[200px] md:max-w-[360px]'}`}
               />
             </a>
           </div>
@@ -350,7 +359,7 @@ function HomePage() {
       {/* ========================================================
           HERO SECTION: OVERSIZED TYPOGRAPHY & PARALLAX MASKING
           ======================================================== */}
-      <section ref={heroRef} className="relative h-[100svh] lg:h-screen flex items-center overflow-hidden bg-[#030303] pt-20">
+      <section ref={heroRef} className="relative h-[100svh] lg:h-screen flex items-center overflow-hidden bg-[#030303] pt-28 sm:pt-24 md:pt-20">
         <motion.div style={{ y: yBg }} className="absolute inset-0 z-0 w-full h-[120%] -top-[10%]">
           <img 
             src={heroHomepageImage}
@@ -363,7 +372,7 @@ function HomePage() {
 
         <motion.div 
           style={{ y: yText, opacity: opacityText }}
-          className="max-w-7xl mx-auto px-6 relative z-10 w-full"
+          className="max-w-7xl mx-auto px-5 sm:px-6 relative z-10 w-full"
         >
           <motion.div 
             initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
@@ -371,40 +380,50 @@ function HomePage() {
           >
             
             
-            <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black uppercase leading-[0.9] tracking-tighter text-white z-20 relative">
+            <h1 className="text-[2.35rem] sm:text-4xl md:text-5xl lg:text-7xl font-black uppercase leading-[0.88] tracking-tighter text-white z-20 relative max-w-[15ch] sm:max-w-none">
               Formazione <br />
               d'eccellenza <br />
               per le <span className="text-brand-red">arti <br />
               dello spettacolo</span>
             </h1>
             
-            <p className="mt-6 text-base md:text-lg text-white/50 max-w-2xl font-medium leading-relaxed">
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-4 sm:mt-5 text-[13px] sm:text-sm md:text-lg text-white/55 max-w-[28rem] md:max-w-2xl font-medium leading-relaxed"
+            >
               Da oltre 20 anni formiamo i talenti del domani. Unisciti all'accademia e trasforma la tua passione nella tua professione.
-            </p>
+            </motion.p>
             
-            <div className="mt-10 flex flex-wrap gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-7 sm:mt-8 md:mt-10 flex flex-wrap gap-4 justify-start"
+            >
               <button 
                 onClick={() => navigate('/chi-siamo')}
-                className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-brand-red flex flex-col items-center justify-center gap-2 font-black uppercase tracking-widest text-black text-[9px] md:text-[10px] hover:scale-105 transition-transform duration-500 group shadow-[0_0_50px_rgba(97,222,227,0.2)] hover:shadow-[0_0_80px_rgba(97,222,227,0.5)]"
+                className="w-[7.75rem] h-[7.75rem] md:w-40 md:h-40 rounded-full bg-brand-red flex flex-col items-center justify-center gap-2 font-black uppercase tracking-widest text-black text-[9px] md:text-[10px] hover:scale-105 active:scale-105 transition-transform duration-500 group shadow-[0_0_40px_rgba(97,222,227,0.2)] hover:shadow-[0_0_80px_rgba(97,222,227,0.5)]"
               >
-                <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-2 transition-transform duration-500" />
+                <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-2 group-active:translate-x-2 transition-transform duration-500" />
                 <span>Scopri di più</span>
               </button>
-            </div>
+            </motion.div>
           </motion.div>
         </motion.div>
 
         {/* Scroll Indicator */}
         <motion.div 
           animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 w-px h-16 bg-gradient-to-b from-brand-red to-transparent z-20 hidden md:block"
+          className="absolute bottom-5 md:bottom-10 left-1/2 -translate-x-1/2 w-px h-8 md:h-16 bg-gradient-to-b from-brand-red/90 to-transparent z-20"
         />
       </section>
 
       {/* ========================================================
           WELCOME SECTION: SCROLL REVEAL TYPOGRAPHY
           ======================================================== */}
-      <section id="accademia" className="py-32 md:py-48 bg-[#030303] relative z-10 border-t border-white/5 overflow-hidden">
+      <section id="accademia" className="py-24 md:py-40 bg-[#030303] relative z-10 border-t border-white/5 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-red/5 blur-[150px] rounded-full pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -413,7 +432,7 @@ function HomePage() {
             <motion.h2
               initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
               variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-              className="text-4xl md:text-6xl lg:text-[80px] font-black mb-16 leading-[0.9] tracking-tight uppercase"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-[80px] font-black mb-12 md:mb-16 leading-[0.9] tracking-tight uppercase"
             >
               {welcomeTitleLineOneWords.map((word, index) => (
                 <motion.span key={`l1-${index}`} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }} className="inline-block mr-3 md:mr-5">
@@ -430,10 +449,10 @@ function HomePage() {
               </span>
             </motion.h2>
             
-            <div className="w-24 h-1 bg-brand-red mx-auto md:mx-0 mb-16 md:mb-24" />
+            <div className="w-16 md:w-24 h-1 bg-brand-red mx-auto md:mx-0 mb-12 md:mb-24" />
             
             {/* Scroll Reveal Component in Action */}
-            <p className="text-3xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight uppercase">
+            <p className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight uppercase">
               {welcomeAnimatedWords.map((word, index) => (
                 <WordReveal key={`reveal-${index}`}>{word}</WordReveal>
               ))}
@@ -445,21 +464,21 @@ function HomePage() {
       {/* ========================================================
           TEACHERS SECTION: ASYMMETRIC PARALLAX GALLERY
           ======================================================== */}
-      <section id="docenti" className="py-32 bg-[#030303] relative border-t border-white/5">
+      <section id="docenti" className="py-24 md:py-32 bg-[#030303] relative border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-24 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 md:mb-24 relative z-10">
             <div className="max-w-2xl">
-              <h2 className="text-6xl md:text-8xl lg:text-[120px] font-black uppercase leading-none tracking-tighter text-white/5 absolute -top-10 md:-top-20 left-0 select-none pointer-events-none">
+              <h2 className="text-5xl md:text-8xl lg:text-[120px] font-black uppercase leading-none tracking-tighter text-white/[0.07] md:text-white/5 absolute -top-8 md:-top-20 left-0 select-none pointer-events-none">
                 Masterclass
               </h2>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-red/30 bg-brand-red/10 text-brand-red text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-sm">
                 <Users className="w-3.5 h-3.5" /> L'Eccellenza
               </div>
-              <h2 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight relative">
+              <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight relative">
                 I nostri <br/><span className="text-brand-red">Docenti</span>
               </h2>
             </div>
-            <p className="text-white/40 max-w-sm text-lg font-medium leading-relaxed pb-4">
+            <p className="text-white/50 md:text-white/40 max-w-sm text-base md:text-lg font-medium leading-relaxed pb-2 md:pb-4">
               Impara la tecnica e i segreti del mestiere dai migliori professionisti del panorama musicale e cinematografico.
             </p>
           </div>
@@ -480,19 +499,19 @@ function HomePage() {
       {/* ========================================================
           BOOKING SECTION: FLOATING MODULE
           ======================================================== */}
-      <section id="booking" className="py-32 relative overflow-hidden bg-[#030303]">
+      <section id="booking" className="py-24 md:py-32 relative overflow-hidden bg-[#030303]">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[500px] bg-brand-red/5 blur-[150px] rounded-full pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="flex flex-col items-center text-center mb-16">
+          <div className="flex flex-col items-center text-center mb-12 md:mb-16">
             <div className="w-16 h-16 rounded-[1.5rem] bg-brand-red/10 border border-brand-red/30 flex items-center justify-center mb-8 transform rotate-12 shadow-[0_0_30px_rgba(97,222,227,0.2)]">
               <Mic2 className="w-8 h-8 text-brand-red -rotate-12" />
             </div>
-            <h2 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight mb-6">
+            <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight mb-5 md:mb-6">
               Prenota la tua <br/><span className="text-brand-red">Sala Prove</span>
             </h2>
-            <p className="text-white/40 max-w-xl text-lg font-medium leading-relaxed">
+            <p className="text-white/50 md:text-white/40 max-w-xl text-base md:text-lg font-medium leading-relaxed">
               Gestisci il tuo tempo creativo. Il nostro sistema di booking sincronizzato ti permette di bloccare le sale in tempo reale.
             </p>
           </div>

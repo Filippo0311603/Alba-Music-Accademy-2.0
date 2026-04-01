@@ -218,12 +218,12 @@ export default function MusicDepartmentPage() {
             <div className="mb-20 flex flex-col lg:flex-row lg:items-end justify-between gap-8 relative z-10 border-b border-white/[0.05] pb-10">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-red mb-4">I Percorsi</p>
-                <h2 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">
+                <h2 className="text-4xl sm:text-5xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">
                   Cosa <br />
                   <span className="text-white">Impari</span>
                 </h2>
               </div>
-              <p className="text-lg text-white/40 max-w-md font-medium text-right hidden lg:block">
+              <p className="text-sm md:text-base lg:text-lg text-white/40 max-w-md font-medium text-left lg:text-right block">
                 Tecnica strumentale estrema, sound design e presenza scenica. Scegli la tua arma.
               </p>
             </div>
@@ -236,14 +236,14 @@ export default function MusicDepartmentPage() {
                   whileInView={{ opacity: 1, y: 0 }} 
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ delay: i * 0.1 }}
-                  className={`${course.colSpan} group relative overflow-hidden rounded-[2rem] border border-white/[0.05] ${course.bgClass || 'bg-[#050505]'} ${course.image ? 'aspect-[4/3] md:aspect-auto md:min-h-[450px]' : 'aspect-square md:aspect-auto md:min-h-[300px]'} flex flex-col justify-end p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_0_50px_rgba(97,222,227,0.1)] transition-all duration-700`}
+                  className={`${course.colSpan} group relative overflow-hidden rounded-[2rem] border border-white/[0.05] ${course.bgClass || 'bg-[#050505]'} ${course.image ? 'aspect-[5/4] md:aspect-auto md:min-h-[450px]' : 'aspect-square md:aspect-auto md:min-h-[300px]'} flex flex-col justify-end p-6 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_0_50px_rgba(97,222,227,0.1)] active:shadow-[0_0_50px_rgba(97,222,227,0.1)] transition-all duration-700`}
                 >
                   {course.image && (
                     <>
                       <img 
                         src={course.image} 
                         alt={course.title} 
-                        className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale contrast-150 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[3s] ease-out"
+                        className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale contrast-150 group-hover:grayscale-0 group-hover:scale-110 group-active:grayscale-0 group-active:scale-110 transition-all duration-[3s] ease-out"
                         referrerPolicy="no-referrer"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/80 to-transparent transition-opacity duration-500" />
@@ -251,7 +251,7 @@ export default function MusicDepartmentPage() {
                   )}
                   
                   {/* Dettagli tecnici in alto a destra */}
-                  <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <div className="absolute top-6 right-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500">
                     <span className="text-[8px] font-black text-brand-red tracking-[0.4em] uppercase">Mod. {i+1}</span>
                   </div>
 
@@ -265,7 +265,7 @@ export default function MusicDepartmentPage() {
                       <h3 className="text-3xl md:text-5xl font-black uppercase mb-4 leading-[0.9] tracking-tighter text-white">
                         {course.title}
                       </h3>
-                      <p className={`text-base font-medium leading-relaxed ${course.image ? 'text-white/50 group-hover:text-white/80' : 'text-white/40 group-hover:text-white/70'} max-w-sm transition-colors duration-500`}>
+                      <p className={`text-base font-medium leading-relaxed ${course.image ? 'text-white/70 md:text-white/50 md:group-hover:text-white/80' : 'text-white/70 md:text-white/40 md:group-hover:text-white/70'} max-w-sm transition-colors duration-500`}>
                         {course.description}
                       </p>
                     </div>
@@ -282,7 +282,7 @@ export default function MusicDepartmentPage() {
              <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-red/5 blur-[150px] rounded-full pointer-events-none z-0" />
 
             <div className="relative z-10 mb-20 text-center">
-              <h2 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">Il <span className="text-brand-red">Metodo</span></h2>
+              <h2 className="text-4xl sm:text-5xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">Il <span className="text-brand-red">Metodo</span></h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
@@ -293,26 +293,25 @@ export default function MusicDepartmentPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.15 }}
-                  style={{ marginTop: i % 2 === 0 ? '0px' : '60px' }} // Sfalsamento asimmetrico via CSS inline
-                  className="group relative overflow-hidden rounded-[2rem] border border-white/[0.03] bg-[#050505] aspect-[2/3] shadow-[0_30px_80px_rgba(0,0,0,0.8)]"
+                  className={`group relative overflow-hidden rounded-[2rem] border border-white/[0.03] bg-[#050505] aspect-[2/3] shadow-[0_30px_80px_rgba(0,0,0,0.8)] ${i % 2 === 0 ? 'lg:mt-0' : 'lg:mt-14'}`}
                 >
                   <img
                     src={block.image}
                     alt={block.title}
-                    className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale contrast-200 group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-[2s] ease-out group-hover:scale-110"
+                    className="absolute inset-0 w-full h-full object-cover opacity-30 md:opacity-20 grayscale contrast-200 group-hover:grayscale-0 group-hover:opacity-60 group-active:grayscale-0 group-active:opacity-60 transition-all duration-[2s] ease-out group-hover:scale-110 group-active:scale-110"
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/60 to-transparent" />
                   
                   {/* Tipografia verticale e numeri giganti */}
-                  <div className="absolute top-6 left-6 text-6xl font-black text-white/[0.03] group-hover:text-brand-red/10 transition-colors duration-700 pointer-events-none select-none">
+                  <div className="absolute top-6 left-6 text-6xl font-black text-white/[0.06] md:text-white/[0.03] group-hover:text-brand-red/10 group-active:text-brand-red/10 transition-colors duration-700 pointer-events-none select-none">
                     0{i + 1}
                   </div>
 
                   <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                    <div className="w-8 h-px bg-brand-red mb-6 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                    <div className="w-8 h-px bg-brand-red mb-6 transform translate-x-0 md:-translate-x-full md:group-hover:translate-x-0 transition-transform duration-500" />
                     <h3 className="text-3xl font-black uppercase mb-4 leading-[0.9] text-white tracking-tighter">{block.title}</h3>
-                    <p className="text-sm text-white/50 font-medium opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                    <p className="text-sm text-white/60 md:text-white/50 font-medium opacity-100 md:opacity-0 transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 md:group-hover:opacity-100 transition-all duration-500">
                       {block.description}
                     </p>
                   </div>
