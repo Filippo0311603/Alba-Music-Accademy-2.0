@@ -76,7 +76,7 @@ export default function LoginPage() {
         >
           <h2 className="text-5xl xl:text-7xl font-black uppercase leading-[0.9] tracking-tight mb-6">
             Bentornato <br />
-            <span className="text-brand-red">A Casa.</span>
+            <span className="text-brand-red">In Accademia.</span>
           </h2>
           <p className="text-lg xl:text-xl text-white/50 font-medium leading-relaxed">
             Accedi al tuo spazio personale. Prenota le sale prove, gestisci i tuoi corsi e continua il tuo percorso di crescita artistica.

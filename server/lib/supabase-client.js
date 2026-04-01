@@ -48,14 +48,35 @@ export async function getAllBookings() {
  * Fetches bookings for a specific date
  */
 export async function getBookingsByDate(date) {
-  const { data, error } = await supabase
+  const withStatus = await supabase
     .from('bookings')
     .select('*')
     .eq('date', date)
     .eq('status', 'confirmed');
 
-  if (error) throw error;
-  return data || [];
+  if (!withStatus.error) {
+    return withStatus.data || [];
+  }
+
+  const message = String(withStatus.error.message || '').toLowerCase();
+  const missingStatusColumn = message.includes("column 'status'") || message.includes('column bookings.status');
+
+  if (!missingStatusColumn) {
+    throw withStatus.error;
+  }
+
+  // Backward-compatibility for legacy schemas without `status`.
+  const legacy = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('date', date);
+
+  if (legacy.error) throw legacy.error;
+
+  return (legacy.data || []).filter((booking) => {
+    const status = String(booking?.status || '').toLowerCase();
+    return !status || status === 'confirmed';
+  });
 }
 
 /**

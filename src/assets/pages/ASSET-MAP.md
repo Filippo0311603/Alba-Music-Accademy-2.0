@@ -57,6 +57,12 @@ Cartella: le-nostre-sale
 - sala-groove.webp
 - sala-stage-pro.webp
 
+## Hollywood Recording Studio (src/pages/HollywoodRecordingStudioPage.tsx)
+Cartella: hollywood-recording-studio
+- hollywood-recording-hero.webp
+- hollywood-recording-control-room.webp
+- hollywood-recording-vocal-booth.webp
+
 ## Auth / Profile / Admin / Booking Actions
 Cartelle: auth, profile, admin, booking-actions
 - Riservate per immagini future (banner, illustrazioni, stati vuoti, icone sezione).

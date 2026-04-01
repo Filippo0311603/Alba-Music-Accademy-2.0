@@ -29,6 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'alba_user';
 const TOKEN_KEY = 'alba_token';
+const AUTH_INVALIDATED_EVENT = 'alba-auth-invalidated';
 
 // ============ PROVIDER COMPONENT ============
 
@@ -50,6 +51,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    const handleAuthInvalidated = () => {
+      setUser(null);
+      setError('Sessione scaduta. Effettua nuovamente il login.');
+    };
+
+    window.addEventListener(AUTH_INVALIDATED_EVENT, handleAuthInvalidated);
+    return () => window.removeEventListener(AUTH_INVALIDATED_EVENT, handleAuthInvalidated);
   }, []);
 
   // ============ AUTH FUNCTIONS ============

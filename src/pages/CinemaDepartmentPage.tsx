@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { Clapperboard, PhoneCall, Camera, Film, Video, Layers, Users, Mic2, ArrowRight, Star } from 'lucide-react';
+import { Clapperboard, PhoneCall, Camera, Film, Video, Layers, Users, Mic2, ArrowRight, Star, Activity, Crosshair, ArrowUpRight } from 'lucide-react';
 import SiteLayout from '../components/SiteLayout';
 import SeoMeta from '../components/SeoMeta';
+import fotoCinemaImage from '../assets/pages/corsi-cinema/foto-cinema-optimized.webp';
+import fotoCinema2Image from '../assets/pages/corsi-cinema/foto-cinema2-optimized.webp';
+import fotoCinema3Image from '../assets/pages/corsi-cinema/foto-cinema3-optimized.webp';
 
 const cinemaTracks = [
   {
@@ -38,7 +41,7 @@ const mainCourses = [
     description: 'Dimentica l\'impostazione teatrale. Impara le tecniche di acting per il grande schermo: micro-espressioni, continuità emotiva nei ciak, gestione dei mark e interazione con l\'obiettivo.',
     icon: Star,
     colSpan: 'md:col-span-8',
-    image: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&q=80&w=1600'
+    image: fotoCinema2Image,
   },
   {
     title: 'Doppiaggio',
@@ -46,7 +49,7 @@ const mainCourses = [
     description: 'Sincronismo labiale (sync), dizione, intenzione drammatica e caratterizzazione vocale. Esercitazioni pratiche al leggio in sale di registrazione professionali.',
     icon: Mic2,
     colSpan: 'md:col-span-4',
-    bgClass: 'bg-gradient-to-br from-brand-red/20 to-brand-red/5 border-brand-red/30'
+    bgClass: 'bg-[#050505] border-white/[0.05] hover:border-brand-red/50 shadow-[inset_0_0_80px_rgba(0,0,0,0.8)]'
   },
   {
     title: 'Regia',
@@ -54,7 +57,7 @@ const mainCourses = [
     description: 'Dalla sceneggiatura allo storyboard, dalla direzione degli attori alla scelta delle inquadrature. Guida il set e trasforma la tua idea in un\'opera audiovisiva completa.',
     icon: Clapperboard,
     colSpan: 'md:col-span-12',
-    image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&q=80&w=2000',
+    image: fotoCinema3Image,
     tall: true
   }
 ];
@@ -112,310 +115,367 @@ export default function CinemaDepartmentPage() {
         ]}
       />
       <SiteLayout>
-      {/* Hero Section Parallax */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden -mt-10 lg:-mt-20">
-        <motion.div style={{ y: yBg }} className="absolute inset-0 z-0">
+      
+      {/* ========================================================
+          HERO: IMMERSIVE EXCLUSION BLEND & TECHNICAL GRID
+          ======================================================== */}
+      <section className="relative h-[100svh] flex items-center justify-center overflow-hidden -mt-20 md:-mt-24 bg-[#000000]">
+        <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_20%,transparent_100%)]" />
+
+        <motion.div style={{ y: yBg }} className="absolute inset-0 z-0 w-full h-[120%] -top-[10%]">
           <img
             src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=2070"
             alt="Dipartimento Cinema"
-            className="w-full h-full object-cover opacity-30 grayscale"
+            className="w-full h-full object-cover opacity-50 grayscale contrast-150 mix-blend-luminosity"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-dark-bg/90 via-dark-bg/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-transparent to-[#000000] opacity-90" />
         </motion.div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full py-20 mt-16">
+        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full flex flex-col items-center text-center pt-20">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-4xl"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full flex flex-col items-center"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-brand-red text-xs font-bold uppercase tracking-wider mb-8">
-              <Clapperboard className="w-3.5 h-3.5" /> Dipartimento Cinema
-            </div>
-            <h1 className="text-6xl md:text-8xl font-black leading-[0.85] tracking-tighter uppercase mb-8">
-              Progetta, gira <br /> e monta come un <br className="hidden md:block"/>
-              <span className="text-brand-red relative inline-block">
-                Professionista
-                <motion.div 
-                  initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.6, duration: 0.8, ease: "easeInOut" }}
-                  className="absolute -bottom-2 md:-bottom-4 left-0 w-full h-2 md:h-4 bg-brand-red origin-left" 
-                />
+            
+            
+            <h1 className="text-[8vw] md:text-[6vw] font-black leading-[0.75] tracking-tighter uppercase text-white mix-blend-overlay drop-shadow-[0_0_50px_rgba(255,255,255,0.1)]">
+              L'arte di emozionare
+              <br />
+              <span className="text-transparent stroke-text" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.9)' }}>
+                attraverso l'obiettivo
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/50 max-w-2xl font-medium leading-relaxed mb-12">
-              Un percorso immersivo nei mestieri del set. Dalla recitazione davanti all'obiettivo fino alla color correction finale in sala montaggio.
+            
+            <p className="mt-12 text-lg md:text-2xl text-white/60 max-w-2xl font-medium leading-relaxed drop-shadow-xl">
+              Progetta, gira e monta come un professionista. Un percorso immersivo nei veri mestieri del set.
             </p>
           </motion.div>
         </div>
+
+        <div className="absolute bottom-10 left-6 right-6 flex justify-between items-end border-t border-white/[0.05] pt-6 z-20 hidden md:flex">
+           <div>
+             <p className="text-[9px] uppercase tracking-[0.3em] font-black text-brand-red mb-1">Status</p>
+             <p className="text-white text-sm font-bold tracking-widest">CASTING OPEN</p>
+           </div>
+           <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }} className="w-px h-16 bg-brand-red" />
+           <div className="text-right">
+             <p className="text-[9px] uppercase tracking-[0.3em] font-black text-white/30 mb-1">Focus</p>
+             <p className="text-white text-sm font-bold tracking-widest">SET & POST-PROD</p>
+           </div>
+        </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-6 py-10 pb-32 space-y-32 md:space-y-40">
+      <div className="bg-[#000000] relative z-20">
+        <div className="max-w-7xl mx-auto px-6 py-32 space-y-48 md:space-y-64">
 
-        {/* ========================================================
-            PREMIUM SECTION: I CORSI PRINCIPALI (Bento Grid Asimmetrica) 
-            ======================================================== */}
-        <section>
-          <div className="mb-16 md:mb-24 flex flex-col items-center md:items-start text-center md:text-left">
-            <h2 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight">
-              I Corsi <br className="hidden md:block"/>
-              <span className="text-brand-red">Principali</span>
-            </h2>
-          </div>
+          {/* ========================================================
+              PREMIUM SECTION: I CORSI PRINCIPALI (Bento Grid Estrema) 
+              ======================================================== */}
+          <section className="relative">
+            <div className="absolute -top-32 right-0 pointer-events-none opacity-[0.02] select-none">
+              <h2 className="text-[25vw] font-black uppercase tracking-tighter leading-none">Focus</h2>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            {mainCourses.map((course, i) => (
-              <motion.div 
-                key={course.title}
-                initial={{ opacity: 0, y: 40 }} 
-                whileInView={{ opacity: 1, y: 0 }} 
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.1 }}
-                className={`${course.colSpan} group relative overflow-hidden rounded-[2.5rem] border border-white/10 ${course.bgClass || 'bg-[#111]'} ${course.tall ? 'aspect-[4/3] md:aspect-[21/9] md:min-h-[600px]' : 'aspect-square md:aspect-auto md:min-h-[450px]'} flex flex-col justify-end p-8 md:p-12`}
-              >
-                {course.image && (
-                  <>
-                    <img 
-                      src={course.image} 
-                      alt={course.title} 
-                      className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 ease-out"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-500" />
-                  </>
-                )}
-                
-                <div className={`relative z-10 ${!course.image && 'h-full flex flex-col justify-between'}`}>
-                  {course.icon && (
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${course.image ? 'bg-white/10 backdrop-blur border border-white/20 text-white' : 'bg-brand-red/10 text-brand-red mb-12'}`}>
-                      <course.icon className="w-8 h-8" />
-                    </div>
+            <div className="mb-20 flex flex-col lg:flex-row lg:items-end justify-between gap-8 relative z-10 border-b border-white/[0.05] pb-10">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-red mb-4">I Percorsi</p>
+                <h2 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">
+                  Corsi <br />
+                  <span className="text-white">Principali</span>
+                </h2>
+              </div>
+              <p className="text-lg text-white/40 max-w-md font-medium text-right hidden lg:block">
+                Recitazione, doppiaggio, e padronanza del mezzo visivo. Scegli il tuo ruolo sul set.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
+              {mainCourses.map((course, i) => (
+                <motion.div 
+                  key={course.title}
+                  initial={{ opacity: 0, y: 40 }} 
+                  whileInView={{ opacity: 1, y: 0 }} 
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`${course.colSpan} group relative overflow-hidden rounded-[2rem] border border-white/[0.05] ${course.bgClass || 'bg-[#050505]'} ${course.tall ? 'aspect-[4/3] md:aspect-[21/9] md:min-h-[500px]' : 'aspect-square md:aspect-auto md:min-h-[400px]'} flex flex-col justify-end p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:shadow-[0_0_50px_rgba(97,222,227,0.1)] transition-all duration-700`}
+                >
+                  {course.image && (
+                    <>
+                      <img 
+                        src={course.image} 
+                        alt={course.title} 
+                        className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale contrast-150 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[3s] ease-out"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/80 to-transparent transition-opacity duration-500" />
+                    </>
                   )}
-                  <div>
-                    <h3 className={`text-4xl md:text-5xl font-black uppercase mb-2 leading-none ${course.image ? 'text-white' : 'text-white'}`}>
-                      {course.title}
-                    </h3>
-                    <p className="text-brand-red font-bold uppercase tracking-wider text-sm mb-6">
-                      {course.subtitle}
-                    </p>
-                    <p className={`text-lg font-medium leading-relaxed max-w-xl ${course.image ? 'text-white/70' : 'text-white/60'}`}>
-                      {course.description}
-                    </p>
+                  
+                  <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <span className="text-[8px] font-black text-brand-red tracking-[0.4em] uppercase">Mod. {i+1}</span>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
 
-        {/* ========================================================
-            STILE EDITORIALE: COMPETENZE TECNICHE (Griglia Fotografica) 
-            ======================================================== */}
-        <section className="relative">
-           {/* Background Typography */}
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full overflow-hidden pointer-events-none z-0">
-            <h2 className="text-[120px] md:text-[250px] lg:text-[300px] font-black uppercase text-white/[0.02] text-center whitespace-nowrap leading-none select-none">
-              SKILLS
-            </h2>
-          </div>
+                  <div className={`relative z-10 ${!course.image && 'h-full flex flex-col justify-between'}`}>
+                    {course.icon && (
+                      <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-8 border transition-all duration-500 ${course.image ? 'bg-[#000000]/50 backdrop-blur-xl border-white/10 text-white group-hover:bg-brand-red group-hover:border-brand-red group-hover:text-black' : 'bg-transparent border-white/10 text-brand-red group-hover:scale-110'}`}>
+                        <course.icon className="w-6 h-6" />
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="text-3xl md:text-5xl font-black uppercase mb-2 leading-[0.9] tracking-tighter text-white">
+                        {course.title}
+                      </h3>
+                      <p className="text-brand-red font-black uppercase tracking-widest text-[9px] mb-6">
+                        {course.subtitle}
+                      </p>
+                      <p className={`text-base font-medium leading-relaxed max-w-xl ${course.image ? 'text-white/50 group-hover:text-white/80' : 'text-white/40 group-hover:text-white/70'} transition-colors duration-500`}>
+                        {course.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
 
-          <div className="relative z-10 mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="max-w-2xl">
-              <h2 className="text-4xl md:text-5xl font-black uppercase mb-6">Competenze <br/><span className="text-brand-red">Tecniche</span></h2>
-              <div className="w-20 h-1 bg-brand-red mb-6" />
-              <p className="text-lg text-white/60 leading-relaxed">
+          {/* ========================================================
+              COMPETENZE TECNICHE: ASYMMETRIC MASONRY
+              ======================================================== */}
+          <section className="relative">
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full overflow-hidden pointer-events-none z-0">
+              <h2 className="text-[18vw] font-black uppercase text-white/[0.02] text-center whitespace-nowrap leading-none select-none tracking-tighter">
+                SKILLS
+              </h2>
+            </div>
+
+            <div className="relative z-10 mb-20 text-center md:text-left">
+              <h2 className="text-6xl md:text-7xl font-black uppercase mb-6 tracking-tighter">Competenze <br className="md:hidden"/><span className="text-brand-red">Tecniche</span></h2>
+              <div className="w-12 h-1 bg-brand-red mb-6 mx-auto md:mx-0" />
+              <p className="text-lg text-white/60 leading-relaxed max-w-2xl mx-auto md:mx-0 font-medium">
                 I laboratori orizzontali fondamentali per padroneggiare il mezzo tecnico: dalla luce al montaggio, per un controllo totale sull'immagine.
               </p>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-            {cinemaTracks.map((track, i) => (
-              <motion.article 
-                key={track.title} 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative overflow-hidden rounded-[2.5rem] aspect-[4/3] lg:aspect-[16/9] border border-white/10 bg-dark-card"
-              >
-                <img
-                  src={track.image}
-                  alt={track.title}
-                  className="absolute inset-0 w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent opacity-90 group-hover:opacity-80 transition-opacity duration-500" />
-                
-                <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end z-10">
-                  <track.icon className="w-10 h-10 text-brand-red mb-6 opacity-80 group-hover:opacity-100 transition-opacity" />
-                  <h3 className="text-3xl font-black uppercase mb-3 text-white leading-none">
-                    {track.title}
-                  </h3>
-                  <p className="text-lg text-white/70 leading-relaxed font-medium max-w-md transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
-                    {track.description}
-                  </p>
-                </div>
-              </motion.article>
-            ))}
-          </div>
-        </section>
-
-        {/* Metodo Section */}
-        <section>
-          <h2 className="text-4xl md:text-5xl font-black uppercase mb-6 text-center md:text-left">Piano <span className="text-brand-red">Didattico</span></h2>
-          <div className="w-20 h-1 bg-brand-red mb-12 mx-auto md:mx-0" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {cinemaPlan.map((block, i) => (
-              <motion.article 
-                key={block.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-dark-card aspect-square"
-              >
-                <img
-                  src={block.image}
-                  alt={block.title}
-                  className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-80 transition-all duration-700 ease-out group-hover:scale-110"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                  <h3 className="text-xl font-black uppercase mb-3 leading-tight text-white">{block.title}</h3>
-                  <p className="text-sm text-white/60 font-medium">{block.description}</p>
-                </div>
-              </motion.article>
-            ))}
-          </div>
-        </section>
-
-        {/* ========================================================
-            STILE EDITORIALE: VANTAGGI ESCLUSIVI (Split Layout) 
-            ======================================================== */}
-        <section className="relative py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-            
-            {/* Colonna Foto Imponente (Sinistra) */}
-            <motion.div 
-              initial={{ opacity: 0, x: -40 }} 
-              whileInView={{ opacity: 1, x: 0 }} 
-              viewport={{ once: true, margin: "-100px" }}
-            >
-              <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl group">
-                <img
-                  src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&q=80&w=1200"
-                  alt="Masterclass Cinema"
-                  className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105 ease-out"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/90 via-transparent to-transparent pointer-events-none" />
-                <div className="absolute bottom-10 left-10 right-10">
-                  <div className="inline-flex px-4 py-1.5 bg-brand-red text-black text-xs font-black uppercase tracking-widest rounded-full mb-4">
-                    Accesso Premium
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+              {cinemaTracks.map((track, i) => (
+                <motion.article 
+                  key={track.title} 
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  style={{ marginTop: i % 2 === 0 ? '0px' : '80px' }}
+                  className="group relative overflow-hidden rounded-[2rem] aspect-[4/3] lg:aspect-[16/9] border border-white/[0.03] bg-[#050505] shadow-[0_30px_80px_rgba(0,0,0,0.8)]"
+                >
+                  <img
+                    src={track.image}
+                    alt={track.title}
+                    className="absolute inset-0 w-full h-full object-cover grayscale opacity-30 contrast-200 group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-[2s] ease-out group-hover:scale-110"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/60 to-transparent" />
+                  
+                  <div className="absolute top-6 left-6 text-6xl font-black text-white/[0.03] group-hover:text-brand-red/10 transition-colors duration-700 pointer-events-none select-none">
+                    0{i + 1}
                   </div>
-                  <p className="text-white/90 font-medium text-lg">Eventi riservati esclusivamente agli iscritti dell'Accademia</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Colonna Testo ed Elenco (Destra) */}
-            <motion.div 
-              initial={{ opacity: 0, x: 40 }} 
-              whileInView={{ opacity: 1, x: 0 }} 
-              viewport={{ once: true, margin: "-100px" }}
-            >
-              <h2 className="text-5xl md:text-6xl font-black uppercase mb-6 leading-[0.9] tracking-tight">
-                Vantaggi <br />
-                <span className="text-brand-red">Esclusivi</span>
-              </h2>
-              <div className="w-20 h-1 bg-brand-red mb-10" />
-              <p className="text-white/60 text-xl leading-relaxed mb-12 font-medium">
-                Non ti offriamo solo lezioni, ma l'ingresso in un ecosistema produttivo reale. Gli studenti del Dipartimento Cinema sbloccano benefit pensati per vivere il set a 360 gradi.
-              </p>
-
-              <div className="flex flex-col">
-                {initiatives.map((item, i) => (
-                  <div key={i} className="group border-t border-white/10 py-6 first:border-t-0 flex items-start gap-6 cursor-default">
-                    <div className="mt-1 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-red transition-colors duration-300 shrink-0">
-                      <ArrowRight className="w-5 h-5 text-white/40 group-hover:text-black transition-colors" />
-                    </div>
-                    <div>
-                      <h4 className="text-2xl font-black uppercase mb-2 text-white/90 group-hover:text-brand-red transition-colors">{item.title}</h4>
-                      <p className="text-white/50 text-base leading-relaxed font-medium">{item.desc}</p>
-                    </div>
+                  
+                  <div className="absolute inset-0 p-8 flex flex-col justify-end z-10">
+                    <div className="w-8 h-px bg-brand-red mb-6 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                    <track.icon className="w-8 h-8 text-brand-red mb-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <h3 className="text-3xl font-black uppercase mb-3 text-white leading-[0.9] tracking-tighter">
+                      {track.title}
+                    </h3>
+                    <p className="text-sm text-white/50 leading-relaxed font-medium max-w-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                      {track.description}
+                    </p>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-
-          </div>
-        </section>
-
-        {/* Teachers Section */}
-        <section>
-          <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div>
-              <h2 className="text-4xl md:text-6xl font-black uppercase leading-none tracking-tight text-center md:text-left">
-                Il Nostro <br className="hidden md:block"/>
-                <span className="text-brand-red">Team</span>
-              </h2>
+                </motion.article>
+              ))}
             </div>
-          </div>
+          </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {cinemaTeachers.map((teacher, i) => (
-              <motion.div
-                key={teacher.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative overflow-hidden rounded-[2rem] aspect-[3/4] border border-white/10"
+          {/* ========================================================
+              PIANO DIDATTICO: EDITORIAL SCROLL
+              ======================================================== */}
+          <section>
+            <h2 className="text-6xl md:text-7xl font-black uppercase mb-16 tracking-tighter text-center md:text-left">Piano <span className="text-brand-red">Didattico</span></h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {cinemaPlan.map((block, i) => (
+                <motion.article 
+                  key={block.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="group relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#050505] aspect-[3/4] shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                >
+                  <img
+                    src={block.image}
+                    alt={block.title}
+                    className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale contrast-125 group-hover:grayscale-0 group-hover:opacity-70 transition-all duration-[2s] ease-out group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/40 to-transparent" />
+                  
+                  <div className="absolute top-6 right-6 text-4xl font-black text-white/10 group-hover:text-brand-red/20 transition-colors duration-500">
+                    P.0{i + 1}
+                  </div>
+
+                  <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                    <h3 className="text-2xl font-black uppercase mb-3 leading-none text-white tracking-tight">{block.title}</h3>
+                    <div className="h-0 group-hover:h-auto overflow-hidden transition-all duration-500">
+                      <p className="text-sm text-white/60 font-medium transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100">{block.description}</p>
+                    </div>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          </section>
+
+          {/* ========================================================
+              VANTAGGI ESCLUSIVI (Split Layout Orizzontale Dinamico) 
+              ======================================================== */}
+          <section className="relative py-12">
+            <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+              
+              <motion.div 
+                initial={{ opacity: 0, x: -50 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true, margin: "-100px" }}
+                className="w-full lg:w-6/12 relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-white/[0.05] shadow-[0_40px_100px_rgba(0,0,0,0.9)] group"
               >
+                <div className="absolute top-6 left-6 z-20 flex gap-2">
+                  <div className="flex items-center gap-2 px-2 py-1 rounded bg-brand-red text-black text-[9px] font-black uppercase tracking-widest">
+                    <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse"/> REC
+                  </div>
+                </div>
                 <img
-                  src={teacher.img}
-                  alt={teacher.name}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
-                  referrerPolicy="no-referrer"
+                  src={fotoCinemaImage}
+                  alt="Masterclass Cinema"
+                  className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-[3s] group-hover:scale-105 ease-out"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent opacity-90" />
-                <div className="absolute bottom-0 left-0 p-8">
-                  <h3 className="text-2xl font-black mb-1 uppercase text-white leading-none">{teacher.name}</h3>    
-                  <p className="text-brand-red text-xs font-bold uppercase tracking-widest">{teacher.role}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-transparent to-transparent opacity-90" />
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, x: 40 }} 
+                whileInView={{ opacity: 1, x: 0 }} 
+                viewport={{ once: true, margin: "-100px" }}
+                className="w-full lg:w-6/12"
+              >
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-brand-red/20 bg-brand-red/5 text-brand-red text-[9px] font-black uppercase tracking-[0.4em] mb-6">
+                  <Star className="w-3 h-3" /> Vip Access
+                </div>
+                <h2 className="text-6xl md:text-7xl font-black uppercase mb-8 leading-[0.85] tracking-tighter">
+                  Vantaggi <br />
+                  <span className="text-transparent stroke-text" style={{ WebkitTextStroke: '2px #61dee3' }}>Esclusivi</span>
+                </h2>
+                <p className="text-white/50 text-lg leading-relaxed mb-12 font-medium">
+                  Non ti offriamo solo lezioni, ma l'ingresso in un ecosistema produttivo reale. Gli studenti del Dipartimento Cinema sbloccano benefit pensati per vivere il set a 360 gradi.
+                </p>
+
+                <div className="flex flex-col">
+                  {initiatives.map((item, i) => (
+                    <div key={i} className="group border-t border-white/[0.05] py-6 first:border-t-0 flex items-start gap-6 cursor-default relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-brand-red transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+                      <div className="mt-1 w-10 h-10 rounded-full bg-[#050505] border border-white/10 flex items-center justify-center group-hover:border-brand-red transition-colors duration-300 shrink-0 z-10 ml-2">
+                        <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-brand-red transition-colors" />
+                      </div>
+                      <div className="relative z-10">
+                        <h4 className="text-2xl font-black uppercase mb-2 text-white/90 group-hover:text-brand-red transition-colors tracking-tight">{item.title}</h4>
+                        <p className="text-white/40 text-sm leading-relaxed font-medium">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </motion.div>
-            ))}
-          </div>
-        </section>
 
-        {/* CTA Section Immersiva */}
-        <motion.section 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-20 rounded-[3rem] border border-brand-red/30 bg-gradient-to-br from-brand-red/20 via-[#0a0a0a] to-transparent p-10 md:p-16 flex flex-col md:flex-row md:items-center md:justify-between gap-10 relative overflow-hidden shadow-[0_0_50px_rgba(97,222,227,0.1)]"
-        >
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-red/10 blur-[100px] rounded-full pointer-events-none" />
-          
-          <div className="relative z-10 max-w-2xl">
-            <h3 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase mb-6 leading-none tracking-tight">Pronto a dare <br/><span className="text-brand-red">Azione?</span></h3>
-            <p className="text-white/60 text-xl font-medium">
-              Chiama ora la segreteria per disponibilità dei corsi, orientamento e dettagli del percorso formativo.
-            </p>
-          </div>
+            </div>
+          </section>
 
-          <a
-            href="tel:+393701497361"
-            className="btn-red relative z-10 whitespace-nowrap text-black hover:text-black py-5 px-10 text-lg rounded-2xl shadow-2xl hover:shadow-[0_0_30px_rgba(97,222,227,0.5)] transition-all duration-300"
+          {/* ========================================================
+              TEACHERS: MOVIE POSTER STYLE
+              ======================================================== */}
+          <section>
+            <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/[0.05] pb-8">
+              <div>
+                <h2 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">
+                  Il Nostro <br />
+                  <span className="text-brand-red">Team</span>
+                </h2>
+              </div>
+              <div className="hidden md:block">
+                 <button className="px-6 py-2 border-b border-white/20 text-[9px] uppercase tracking-[0.3em] font-black text-white/40 hover:text-white hover:border-brand-red transition-all">Vedi Tutti i Docenti</button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center">
+              {cinemaTeachers.map((teacher, i) => (
+                <motion.div
+                  key={teacher.name}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.8 }}
+                  className="group relative overflow-hidden aspect-[9/16] bg-[#050505] shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/[0.05] hover:border-brand-red/30 transition-colors duration-500"
+                >
+                  <img
+                    src={teacher.img}
+                    alt={teacher.name}
+                    className="w-full h-full object-cover grayscale contrast-150 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-[2.5s] ease-out mix-blend-luminosity group-hover:mix-blend-normal"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/30 to-transparent opacity-90" />
+                  
+                  <div className="absolute top-6 right-6 text-[8px] font-black text-white/20 uppercase tracking-[0.5em] [writing-mode:vertical-rl] rotate-180">
+                    DIR_{i}
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 w-full p-8 flex flex-col">
+                    <h3 className="text-3xl font-black mb-1 uppercase text-white leading-none tracking-tighter">{teacher.name}</h3>    
+                    <p className="text-brand-red text-[8px] font-black uppercase tracking-[0.3em]">{teacher.role}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+
+          {/* ========================================================
+              CTA: CYBERPUNK TERMINAL
+              ======================================================== */}
+          <motion.section 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-32 border-y border-brand-red/20 bg-[#050505] p-12 md:p-24 flex flex-col md:flex-row md:items-center md:justify-between gap-12 relative overflow-hidden shadow-[0_0_100px_rgba(97,222,227,0.05)]"
           >
-            <PhoneCall className="w-6 h-6" /> Chiama ora
-          </a>
-        </motion.section>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-brand-red/10 blur-[150px] pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none" />
+            
+            <div className="relative z-10 max-w-2xl">
+              <div className="flex items-center gap-4 mb-8">
+                <Activity className="w-5 h-5 text-brand-red animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40">System Override</span>
+              </div>
+              <h3 className="text-6xl md:text-8xl font-black uppercase mb-6 leading-[0.85] tracking-tighter text-white">Pronto a dare <br/><span className="text-brand-red drop-shadow-[0_0_20px_rgba(97,222,227,0.5)]">Azione?</span></h3>
+              <p className="text-white/40 text-xl font-medium leading-relaxed border-l border-white/10 pl-6">
+                Chiama ora la segreteria per disponibilità dei corsi, orientamento e dettagli del percorso formativo.
+              </p>
+            </div>
 
+            <a
+              href="tel:+393701497361"
+              className="relative z-10 flex items-center justify-center gap-4 py-8 px-12 bg-white text-black hover:bg-brand-red hover:text-black transition-all duration-500 shadow-[0_0_50px_rgba(255,255,255,0.2)] hover:shadow-[0_0_80px_rgba(97,222,227,0.6)] group"
+            >
+               <span className="text-[12px] font-black uppercase tracking-[0.4em]">Chiama Ora</span>
+               <ArrowUpRight className="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </a>
+          </motion.section>
+
+        </div>
       </div>
       </SiteLayout>
     </>

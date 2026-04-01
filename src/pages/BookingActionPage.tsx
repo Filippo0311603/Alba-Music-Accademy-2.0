@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import academyLogo from '../assets/logo/logo_accademia.png';
 import SeoMeta from '../components/SeoMeta';
 
@@ -25,6 +25,7 @@ function getActionFromPathname(pathname: string): {action: ActionType; token: st
 
 export default function BookingActionPage() {
   const route = useMemo(() => getActionFromPathname(window.location.pathname), []);
+  const hasProcessedActionRef = useRef(false);
   const [status, setStatus] = useState<Status>('loading');
   const [result, setResult] = useState<ActionResult>({
     title: 'Elaborazione in corso',
@@ -40,6 +41,13 @@ export default function BookingActionPage() {
       });
       return;
     }
+
+    // In React StrictMode (dev) effects can run twice. This guard prevents
+    // duplicate action calls that would turn a fresh confirmation into "already confirmed".
+    if (hasProcessedActionRef.current) {
+      return;
+    }
+    hasProcessedActionRef.current = true;
 
     const endpoint = `/api/bookings/action/${route.action}/${route.token}`;
 
@@ -60,8 +68,10 @@ export default function BookingActionPage() {
           return;
         }
 
-        const warningTypes = new Set(['already-confirmed', 'already-cancelled']);
-        setStatus(warningTypes.has(String(data?.type || '')) ? 'warning' : 'success');
+        const type = String(data?.type || '');
+        const isConfirmAlreadyConfirmed = route.action === 'confirm' && type === 'already-confirmed';
+        const warningTypes = new Set(['already-cancelled']);
+        setStatus(isConfirmAlreadyConfirmed ? 'success' : warningTypes.has(type) ? 'warning' : 'success');
         setResult({title, message, type: data?.type});
       })
       .catch(() => {

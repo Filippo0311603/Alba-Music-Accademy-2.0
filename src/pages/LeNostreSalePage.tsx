@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { PhoneCall, Clock3, Ruler, Music2, Drum, Mic2, Guitar, Piano, Star, ArrowRight } from 'lucide-react';
+import { PhoneCall, Clock3, Ruler, Music2, Drum, Mic2, Guitar, Piano, Star, ArrowRight, Sparkles } from 'lucide-react';
 import SiteLayout from '../components/SiteLayout';
 import SeoMeta from '../components/SeoMeta';
 
@@ -80,7 +80,9 @@ function getSavingsPercent(hourlyPrice: number, packageOffer: PackageOffer) {
 
 export default function LeNostreSalePage() {
   const { scrollYProgress } = useScroll();
-  const yBg = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
+  const yBg = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const yText = useTransform(scrollYProgress, [0, 1], ['0%', '-50%']);
+  const opacityText = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
     <>
@@ -96,272 +98,266 @@ export default function LeNostreSalePage() {
       <SiteLayout>
         
         {/* ========================================================
-            HERO PARALLAX
+            HERO PARALLAX: OVERSIZED TYPOGRAPHY
             ======================================================== */}
-        <section className="relative min-h-[85vh] flex items-center overflow-hidden -mt-10 lg:-mt-20">
-          <motion.div style={{ y: yBg }} className="absolute inset-0 z-0">
+        <section className="relative h-screen flex items-center overflow-hidden -mt-10 lg:-mt-20 bg-[#030303]">
+          
+          <motion.div style={{ y: yBg }} className="absolute inset-0 z-0 w-full h-[120%] -top-[10%]">
             <img
-              src="https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&q=80&w=2000"
+              src="https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&q=80&w=2500"
               alt="Le nostre sale prove"
-              className="w-full h-full object-cover opacity-40 grayscale"
+              className="w-full h-full object-cover opacity-40 grayscale contrast-125"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-dark-bg/90 via-dark-bg/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#030303]/80 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-brand-red mix-blend-overlay opacity-10" />
           </motion.div>
 
-          <div className="max-w-7xl mx-auto px-6 relative z-10 w-full pt-32">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-4xl"
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-brand-red text-xs font-bold uppercase tracking-widest mb-8 shadow-2xl">
-                <Music2 className="w-3.5 h-3.5" /> Sale Prove & Studi
-              </div>
-              <h1 className="text-6xl md:text-8xl lg:text-[120px] font-black leading-[0.85] tracking-tighter uppercase mb-8">
-                Le Nostre <br />
-                <span className="text-brand-red relative inline-block">
-                  Sale
-                  <motion.div 
-                    initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.6, duration: 0.8, ease: "easeInOut" }}
-                    className="absolute -bottom-2 md:-bottom-4 left-0 w-full h-2 md:h-4 bg-brand-red origin-left" 
-                  />
-                </span>
-              </h1>
-              <p className="text-xl md:text-2xl text-white/50 max-w-2xl font-medium leading-relaxed">
-                Ambienti professionali, acustica impeccabile e strumentazione top tier per artisti, band e produzioni esigenti.
-              </p>
-            </motion.div>
-          </div>
+          <motion.div 
+            style={{ y: yText, opacity: opacityText }} 
+            className="relative z-10 w-full pt-32 flex flex-col items-center text-center px-6"
+          >
+            
+            
+            <h1 className="text-[13vw] leading-none font-black uppercase tracking-tighter text-transparent stroke-text select-none drop-shadow-2xl mix-blend-screen" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.8)' }}>
+              Le nostre sale
+            </h1>
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white -mt-4 md:-mt-8 lg:-mt-12 z-20">
+              Vieni a  <span className="text-brand-red">Trovarci</span>
+            </h2>
+            
+            <p className="mt-8 text-lg md:text-xl text-white/50 max-w-2xl font-medium leading-relaxed">
+              Ambienti professionali, acustica impeccabile e strumentazione top tier. Per gli artisti, le band e le produzioni che non accettano compromessi.
+            </p>
+          </motion.div>
+
+          <motion.div 
+            animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 w-px h-16 bg-gradient-to-b from-brand-red to-transparent z-20"
+          />
         </section>
 
-        <div className="max-w-7xl mx-auto px-6 py-12 md:py-24 space-y-32 md:space-y-40">
-          
-          {/* ========================================================
-              SALE PROVE - EDITORIAL SPLIT
-              ======================================================== */}
-          <section>
-            <div className="mb-20 max-w-3xl">
-              <h2 className="text-4xl md:text-6xl font-black uppercase mb-6 leading-none tracking-tight">
-                Specifiche e <br/> <span className="text-brand-red">Dotazioni</span>
-              </h2>
-              <div className="w-24 h-1 bg-brand-red mb-8" />
-              <p className="text-white/60 text-xl font-medium leading-relaxed">
-                Ogni sala è stata concepita, misurata e trattata per rispondere a esigenze reali. Niente rimbombi, niente frequenze fastidiose. Solo tu, il tuo strumento e il suono perfetto.
-              </p>
-            </div>
-
-            <div className="space-y-24 md:space-y-32">
-              {rooms.map((room, index) => (
-                <div 
-                  key={room.name} 
-                  className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12 lg:gap-20`}
-                >
-                  {/* Foto Sala */}
-                  <motion.div 
-                    initial={{ opacity: 0, x: index % 2 === 1 ? 40 : -40 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    className="w-full lg:w-7/12 relative aspect-[4/3] lg:aspect-[16/10] rounded-[3rem] overflow-hidden border border-white/10 group shadow-2xl"
-                  >
-                    <img
-                      src={room.image}
-                      alt={room.name}
-                      className="absolute inset-0 w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-out"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-80" />
-                    
-                    {/* Badge Prezzo Sovrapposto */}
-                    <div className="absolute bottom-8 left-8">
-                      <div className="inline-flex items-center gap-3 rounded-full bg-black/80 backdrop-blur-xl border border-white/10 px-5 py-3 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-                        <Clock3 className="w-5 h-5 text-brand-red" />
-                        <span className="text-xl font-black">{room.hourlyPrice} <span className="text-sm text-white/50 font-bold uppercase tracking-wider">EUR/ora</span></span>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Testo e Dettagli */}
-                  <motion.div 
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    className="w-full lg:w-5/12 flex flex-col justify-center"
-                  >
-                    <h3 className="text-4xl md:text-5xl font-black uppercase mb-4 leading-none tracking-tight">
-                      {room.name}
-                    </h3>
-                    
-                    <div className="inline-flex items-center gap-2 text-sm font-bold text-white/90 mb-8 border-b border-white/10 pb-6">
-                      <Ruler className="w-5 h-5 text-brand-red" /> 
-                      <span className="tracking-widest uppercase">{room.mq} Metri Quadri</span>
-                    </div>
-
-                    <p className="text-white/60 text-lg leading-relaxed mb-10 font-medium">
-                      {room.description}
-                    </p>
-
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-5 font-bold">Backline Incluso</p>
-                      <ul className="space-y-4">
-                        {room.equipment.map((equipment) => (
-                          <li key={equipment} className="flex items-start gap-4 text-white/80 font-medium">
-                            <div className="w-6 h-6 rounded-full bg-brand-red/10 flex items-center justify-center shrink-0 mt-0.5">
-                              <Star className="w-3 h-3 text-brand-red" />
-                            </div>
-                            <span>{equipment}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </motion.div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* ========================================================
-              PACCHETTI CONVENIENZA - SAAS STYLE PRICING
-              ======================================================== */}
-          <section className="relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[600px] bg-brand-red/5 blur-[150px] rounded-full pointer-events-none" />
+        <div className="bg-[#030303] relative z-20">
+          <div className="max-w-7xl mx-auto px-6 py-24 md:py-32 space-y-32 md:space-y-48">
             
-            <div className="relative z-10 text-center mb-16 md:mb-24">
-              <h2 className="text-4xl md:text-6xl font-black uppercase mb-6 leading-none tracking-tight">
-                Piani & <span className="text-brand-red">Pacchetti</span>
-              </h2>
-              <p className="text-white/60 text-xl font-medium max-w-2xl mx-auto">
-                Assicurati la tua sala, blocca il tuo orario preferito e abbatti il costo orario. Progettati per dare continuità al tuo suono.
-              </p>
-            </div>
+            {/* ========================================================
+                LE SALE PROVE - IMMERSIVE GLASSMORPHISM
+                ======================================================== */}
+            <section>
+              <div className="mb-24 text-center">
+                <h2 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight">
+                  Specifiche <br/> <span className="text-brand-red">& Spazi</span>
+                </h2>
+                <div className="w-24 h-1 bg-brand-red mx-auto mt-8 mb-8" />
+                <p className="text-white/50 text-xl font-medium leading-relaxed max-w-3xl mx-auto">
+                  Ogni sala è stata concepita, misurata e trattata per rispondere a esigenze reali. Niente rimbombi, niente frequenze fastidiose. Solo tu, il tuo strumento e il suono perfetto.
+                </p>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-              {packageOffers.map((offer, index) => {
-                const savings = getSavingsPercent(rooms[1].hourlyPrice, offer);
-                // Evidenziamo il pacchetto centrale
-                const isPopular = index === 1;
-
-                return (
-                  <motion.article 
-                    key={offer.name} 
-                    initial={{ opacity: 0, y: 40 }}
+              <div className="space-y-24 md:space-y-32">
+                {rooms.map((room, index) => (
+                  <motion.div 
+                    key={room.name} 
+                    initial={{ opacity: 0, y: 50 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`relative overflow-hidden rounded-[2.5rem] p-10 flex flex-col ${
-                      isPopular 
-                      ? 'bg-gradient-to-b from-brand-red/20 to-[#111] border border-brand-red/50 shadow-[0_0_50px_rgba(97,222,227,0.15)] transform md:-translate-y-4' 
-                      : 'bg-[#111]/80 backdrop-blur-xl border border-white/10'
-                    }`}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8 }}
+                    className="relative w-full rounded-[3rem] overflow-hidden border border-white/10 group bg-[#0a0a0a] shadow-[0_0_50px_rgba(0,0,0,0.8)]"
                   >
-                    {isPopular && (
-                      <div className="absolute top-0 left-0 w-full py-2 bg-brand-red text-black text-center text-[10px] font-black uppercase tracking-widest">
-                        Scelta più Popolare
-                      </div>
-                    )}
-                    
-                    <div className={`mt-${isPopular ? '6' : '0'} mb-8`}>
-                      <h3 className="text-2xl font-black uppercase mb-2">{offer.name}</h3>
-                      <p className="text-white/50 text-sm font-medium h-10">Ideale per {offer.idealFor}</p>
-                    </div>
-
-                    <div className="mb-10 pb-10 border-b border-white/10">
-                      <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-5xl font-black text-white leading-none">{offer.packagePrice}</span>
-                        <span className="text-white/40 font-bold uppercase tracking-wider text-sm">EUR</span>
-                      </div>
-                      <p className="text-brand-red font-bold text-sm tracking-wider uppercase">
-                        {offer.hours} Ore Totali
-                      </p>
-                    </div>
-
-                    <div className="flex-1">
-                      <p className="text-white/80 font-medium flex items-start gap-3 mb-6">
-                        <ArrowRight className="w-5 h-5 text-brand-red shrink-0" />
-                        {offer.includes}
-                      </p>
+                    <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[600px]">
                       
-                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-black uppercase tracking-widest">
-                        Risparmi il {savings}%
+                      {/* Immagine di Fondo (Ocupa tutto su mobile, meta su desktop) */}
+                      <div className={`absolute inset-0 lg:relative lg:col-span-7 h-full z-0 overflow-hidden ${index % 2 === 1 ? 'lg:order-2' : ''}`}>
+                        <img
+                          src={room.image}
+                          alt={room.name}
+                          className="absolute inset-0 w-full h-full object-cover grayscale opacity-40 lg:opacity-70 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-[1.5s] ease-out"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-[#030303] via-[#030303]/80 lg:via-transparent to-transparent" />
+                      </div>
+
+                      {/* Contenuto in Glassmorphism */}
+                      <div className={`relative z-10 lg:col-span-5 p-8 md:p-12 lg:p-16 flex flex-col justify-center ${index % 2 === 1 ? 'lg:order-1' : ''}`}>
+                        <div className="inline-flex items-center gap-3 rounded-full bg-brand-red/10 border border-brand-red/30 px-4 py-2 mb-8 backdrop-blur-md w-fit">
+                          <Clock3 className="w-4 h-4 text-brand-red" />
+                          <span className="text-xl font-black text-brand-red leading-none">{room.hourlyPrice} <span className="text-[10px] text-white/70 uppercase tracking-widest">EUR / Ora</span></span>
+                        </div>
+
+                        <h3 className="text-5xl md:text-6xl font-black uppercase mb-4 leading-none tracking-tight text-white">
+                          {room.name}
+                        </h3>
+                        
+                        <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-white/50 mb-8 pb-6 border-b border-white/10">
+                          <Ruler className="w-4 h-4 text-brand-red" /> {room.mq} Metri Quadri
+                        </div>
+
+                        <p className="text-white/70 text-lg leading-relaxed mb-10 font-medium">
+                          {room.description}
+                        </p>
+
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-5 font-black">Backline Incluso</p>
+                          <div className="flex flex-wrap gap-2">
+                            {room.equipment.map((equipment) => (
+                              <span key={equipment} className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm font-medium backdrop-blur-sm hover:border-brand-red/50 transition-colors">
+                                {equipment}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </motion.article>
-                );
-              })}
-            </div>
-          </section>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
 
-          {/* ========================================================
-              BACKLINE BOXES
-              ======================================================== */}
-          <section>
-            <div className="mb-12">
-              <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-center md:text-left">
-                Il Nostro <span className="text-brand-red">Hardware</span>
-              </h3>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="rounded-[2rem] bg-white/[0.02] border border-white/10 p-8 text-center hover:bg-brand-red/10 hover:border-brand-red/30 transition-all duration-300 group">
-                <Guitar className="w-10 h-10 mx-auto text-white/40 group-hover:text-brand-red transition-colors mb-4" />
-                <span className="block text-sm font-bold uppercase tracking-wider text-white/80">Amps & Cab</span>
-              </motion.div>
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="rounded-[2rem] bg-white/[0.02] border border-white/10 p-8 text-center hover:bg-brand-red/10 hover:border-brand-red/30 transition-all duration-300 group">
-                <Drum className="w-10 h-10 mx-auto text-white/40 group-hover:text-brand-red transition-colors mb-4" />
-                <span className="block text-sm font-bold uppercase tracking-wider text-white/80">Drum Kits</span>
-              </motion.div>
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="rounded-[2rem] bg-white/[0.02] border border-white/10 p-8 text-center hover:bg-brand-red/10 hover:border-brand-red/30 transition-all duration-300 group">
-                <Mic2 className="w-10 h-10 mx-auto text-white/40 group-hover:text-brand-red transition-colors mb-4" />
-                <span className="block text-sm font-bold uppercase tracking-wider text-white/80">Microfoni</span>
-              </motion.div>
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="rounded-[2rem] bg-white/[0.02] border border-white/10 p-8 text-center hover:bg-brand-red/10 hover:border-brand-red/30 transition-all duration-300 group">
-                <Piano className="w-10 h-10 mx-auto text-white/40 group-hover:text-brand-red transition-colors mb-4" />
-                <span className="block text-sm font-bold uppercase tracking-wider text-white/80">Keyboards</span>
-              </motion.div>
-            </div>
-          </section>
+            {/* ========================================================
+                PACCHETTI CONVENIENZA - APPLE/SAAS PRICING
+                ======================================================== */}
+            <section className="relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-red/5 blur-[150px] rounded-full pointer-events-none" />
+              
+              <div className="relative z-10 text-center mb-20">
+                <h2 className="text-5xl md:text-7xl font-black uppercase mb-6 leading-none tracking-tight">
+                  Piani & <span className="text-brand-red">Pacchetti</span>
+                </h2>
+                <p className="text-white/50 text-xl font-medium max-w-2xl mx-auto">
+                  Abbatti il costo orario, dai continuità al tuo suono. Progettati per la massima resa.
+                </p>
+              </div>
 
-          {/* ========================================================
-              CTA - CONTATTI
-              ======================================================== */}
-          <motion.section 
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="rounded-[3rem] border border-brand-red/30 bg-gradient-to-br from-brand-red/20 via-[#0a0a0a] to-transparent p-10 md:p-16 flex flex-col lg:flex-row lg:items-center justify-between gap-12 relative overflow-hidden shadow-[0_0_50px_rgba(97,222,227,0.1)]"
-          >
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-red/10 blur-[100px] rounded-full pointer-events-none" />
-            
-            <div className="max-w-2xl relative z-10">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase mb-6 leading-none tracking-tight">
-                Prenotazioni solo tramite <br/><span className="text-brand-red">Segreteria</span>
-              </h2>
-              <p className="text-white/70 text-xl font-medium leading-relaxed mb-4">
-                Non usiamo bot. Ti consigliamo la sala e l'orario migliore in base al tuo progetto e alle tue esigenze reali.
-              </p>
-              <p className="text-brand-red font-bold text-xs uppercase tracking-widest">
-                *Disponibilità soggetta a calendario interno
-              </p>
-            </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10 items-center">
+                {packageOffers.map((offer, index) => {
+                  const savings = getSavingsPercent(rooms[1].hourlyPrice, offer);
+                  const isPopular = index === 1;
 
-            <div className="flex flex-col sm:flex-row gap-4 relative z-10 shrink-0">
-              <a
-                href="tel:+393701497361"
-                className="btn-red relative whitespace-nowrap text-black hover:text-black py-5 px-8 text-sm rounded-2xl shadow-2xl hover:shadow-[0_0_30px_rgba(97,222,227,0.5)] transition-all duration-300 flex items-center justify-center gap-3"
-              >
-                <PhoneCall className="w-5 h-5" /> Chiama Ora
-              </a>
-              <a
-                href="mailto:albamusicacademy@gmail.com"
-                className="px-8 py-5 rounded-2xl border border-white/20 text-white font-black uppercase tracking-widest text-xs hover:bg-white hover:text-black hover:border-white transition-all duration-300 flex items-center justify-center"
-              >
-                Invia Email
-              </a>
-            </div>
-          </motion.section>
+                  return (
+                    <motion.article 
+                      key={offer.name} 
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`relative overflow-hidden rounded-[3rem] p-10 flex flex-col transition-all duration-500 ${
+                        isPopular 
+                        ? 'bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] border border-brand-red/40 shadow-[0_0_60px_rgba(97,222,227,0.15)] lg:scale-105 z-20 py-16' 
+                        : 'bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/5 hover:border-white/20 z-10'
+                      }`}
+                    >
+                      {isPopular && (
+                        <div className="absolute top-0 left-0 w-full py-2 bg-brand-red text-black text-center text-[10px] font-black uppercase tracking-[0.2em]">
+                          Scelta più Popolare
+                        </div>
+                      )}
+                      
+                      <div className={`mt-${isPopular ? '4' : '0'} mb-8`}>
+                        <h3 className="text-2xl lg:text-3xl font-black uppercase mb-2">{offer.name}</h3>
+                        <p className="text-white/40 text-xs font-bold uppercase tracking-wider h-8">Per {offer.idealFor}</p>
+                      </div>
 
+                      <div className="mb-10 pb-10 border-b border-white/10">
+                        <div className="flex items-start gap-2 mb-2">
+                          <span className="text-6xl font-black text-white leading-none tracking-tighter">{offer.packagePrice}</span>
+                          <span className="text-brand-red font-bold uppercase tracking-widest text-sm mt-2">EUR</span>
+                        </div>
+                        <p className="text-white/60 font-bold text-sm tracking-wider uppercase flex items-center gap-2 mt-4">
+                          <Clock3 className="w-4 h-4 text-brand-red" /> {offer.hours} Ore Incluse
+                        </p>
+                      </div>
+
+                      <div className="flex-1 flex flex-col justify-between">
+                        <p className="text-white/80 font-medium flex items-start gap-4 mb-8 leading-relaxed text-sm">
+                          <Star className="w-5 h-5 text-brand-red shrink-0 fill-brand-red/20" />
+                          {offer.includes}
+                        </p>
+                        
+                        <div className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-black uppercase tracking-[0.1em] w-full">
+                          Risparmi il {savings}%
+                        </div>
+                      </div>
+                    </motion.article>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* ========================================================
+                BACKLINE HARDWARE ECOSYSTEM
+                ======================================================== */}
+            <section className="py-12">
+              <div className="mb-16 text-center">
+                <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
+                  Ecosistema <span className="text-brand-red">Hardware</span>
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 p-10 text-center hover:bg-[#111] hover:border-brand-red/30 transition-all duration-500 group shadow-xl">
+                  <Guitar className="w-12 h-12 mx-auto text-white/20 group-hover:text-brand-red transition-colors mb-6" />
+                  <span className="block text-xs font-black uppercase tracking-[0.1em] text-white/60 group-hover:text-white transition-colors">Amps & Cab</span>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 p-10 text-center hover:bg-[#111] hover:border-brand-red/30 transition-all duration-500 group shadow-xl">
+                  <Drum className="w-12 h-12 mx-auto text-white/20 group-hover:text-brand-red transition-colors mb-6" />
+                  <span className="block text-xs font-black uppercase tracking-[0.1em] text-white/60 group-hover:text-white transition-colors">Drum Kits</span>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 p-10 text-center hover:bg-[#111] hover:border-brand-red/30 transition-all duration-500 group shadow-xl">
+                  <Mic2 className="w-12 h-12 mx-auto text-white/20 group-hover:text-brand-red transition-colors mb-6" />
+                  <span className="block text-xs font-black uppercase tracking-[0.1em] text-white/60 group-hover:text-white transition-colors">Microfoni</span>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="rounded-[2.5rem] bg-[#0a0a0a] border border-white/5 p-10 text-center hover:bg-[#111] hover:border-brand-red/30 transition-all duration-500 group shadow-xl">
+                  <Piano className="w-12 h-12 mx-auto text-white/20 group-hover:text-brand-red transition-colors mb-6" />
+                  <span className="block text-xs font-black uppercase tracking-[0.1em] text-white/60 group-hover:text-white transition-colors">Keyboards</span>
+                </motion.div>
+              </div>
+            </section>
+
+            {/* ========================================================
+                CTA GIGANTE - CONTATTI
+                ======================================================== */}
+            <motion.section 
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="rounded-[3rem] border border-brand-red/30 bg-gradient-to-br from-brand-red/20 via-[#0a0a0a] to-transparent p-10 md:p-16 lg:p-24 flex flex-col lg:flex-row lg:items-center justify-between gap-12 relative overflow-hidden shadow-[0_0_50px_rgba(97,222,227,0.1)]"
+            >
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-red/10 blur-[120px] rounded-full pointer-events-none" />
+              
+              <div className="max-w-2xl relative z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-red/30 bg-brand-red/10 text-brand-red text-[10px] font-black uppercase tracking-[0.2em] mb-6">
+                  <PhoneCall className="w-3 h-3" /> Solo via Segreteria
+                </div>
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase mb-6 leading-[0.9] tracking-tight">
+                  Blocca ora la <br/><span className="text-brand-red">Tua Sala</span>
+                </h2>
+                <p className="text-white/60 text-xl font-medium leading-relaxed mb-4">
+                  Non usiamo bot automatizzati. Preferiamo consigliarti la sala e l'orario migliore in base al tuo progetto e alle tue esigenze reali.
+                </p>
+                <p className="text-brand-red font-bold text-[10px] uppercase tracking-widest mt-6">
+                  *Disponibilità soggetta a calendario interno
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-4 relative z-10 shrink-0 w-full lg:w-auto">
+                <a
+                  href="tel:+393701497361"
+                  className="relative overflow-hidden w-full lg:w-auto px-10 py-6 bg-white text-black rounded-[2rem] font-black uppercase tracking-widest text-sm hover:bg-brand-red transition-colors duration-500 flex items-center justify-center gap-3 group/btn"
+                >
+                  <PhoneCall className="w-5 h-5 group-hover/btn:rotate-12 transition-transform" /> 
+                  Chiama Ora
+                </a>
+                <a
+                  href="mailto:albamusicacademy@gmail.com"
+                  className="w-full lg:w-auto px-10 py-6 rounded-[2rem] border border-white/20 text-white font-black uppercase tracking-widest text-xs hover:border-white hover:bg-white/5 transition-all duration-300 flex items-center justify-center gap-3"
+                >
+                  Invia Email <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </motion.section>
+
+          </div>
         </div>
       </SiteLayout>
     </>

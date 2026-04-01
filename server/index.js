@@ -887,8 +887,8 @@ async function handleConfirmBookingActionApi(req, res) {
   if (outcome.type === 'already-confirmed') {
     return res.status(200).json({
       type: outcome.type,
-      title: 'Prenotazione gia confermata',
-      message: 'La tua prenotazione risulta gia attiva.',
+      title: 'Prenotazione confermata',
+      message: 'La tua prenotazione e confermata e risulta gia attiva.',
     });
   }
 
