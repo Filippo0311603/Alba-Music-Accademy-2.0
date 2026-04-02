@@ -31,6 +31,18 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   },
 });
 
+function normalizeTimeLabel(rawTime) {
+  const value = String(rawTime || '').trim();
+  const match = value.match(/^(\d{1,2}):(\d{2})/);
+
+  if (!match) {
+    return value;
+  }
+
+  const hours = String(Number(match[1])).padStart(2, '0');
+  return `${hours}:${match[2]}`;
+}
+
 /**
  * Fetches all bookings (for admin panel)
  */
@@ -77,6 +89,48 @@ export async function getBookingsByDate(date) {
     const status = String(booking?.status || '').toLowerCase();
     return !status || status === 'confirmed';
   });
+}
+
+/**
+ * Fetches booked time slots for a specific date.
+ * This helper is intentionally narrow so the calendar can keep working even if
+ * the bookings schema changes around status fields.
+ */
+export async function getBookedTimesByDate(date) {
+  const result = await supabase
+    .from('bookings')
+    .select('time, status')
+    .eq('date', date);
+
+  if (result.error) {
+    const message = String(result.error.message || '').toLowerCase();
+    const missingStatusColumn = message.includes("column 'status'") || message.includes('column bookings.status');
+
+    if (!missingStatusColumn) {
+      throw result.error;
+    }
+
+    const legacy = await supabase
+      .from('bookings')
+      .select('time')
+      .eq('date', date);
+
+    if (legacy.error) {
+      throw legacy.error;
+    }
+
+    return (legacy.data || [])
+      .map((booking) => normalizeTimeLabel(booking?.time))
+      .filter(Boolean);
+  }
+
+  return (result.data || [])
+    .filter((booking) => {
+      const status = String(booking?.status || '').toLowerCase();
+      return !status || status === 'confirmed';
+    })
+    .map((booking) => normalizeTimeLabel(booking?.time))
+    .filter(Boolean);
 }
 
 /**

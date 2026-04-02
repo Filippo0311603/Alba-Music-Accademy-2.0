@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { Target, Heart, Award, Sparkles, ArrowRight } from 'lucide-react';
 import SiteLayout from '../components/SiteLayout';
@@ -20,6 +21,25 @@ const floatingRoles = [
 
 export default function ChiSiamoPage() {
   const containerRef = useRef(null);
+  const navigate = useNavigate();
+
+  const roleToDepartmentPath: Record<string, string> = {
+    'Music Production': '/corsi/musica',
+    'Sound Engineer': '/corsi/musica',
+    'Vocal Coach': '/corsi/musica',
+    'Masterclass': '/corsi/musica',
+    'Regia & Sceneggiatura': '/corsi/cinema',
+    'Cinematographer': '/corsi/cinema',
+    'Doppiaggio': '/corsi/cinema',
+    'Film Editor': '/corsi/cinema',
+  };
+
+  const handleRoleClick = (roleName: string) => {
+    const destination = roleToDepartmentPath[roleName];
+    if (destination) {
+      navigate(destination);
+    }
+  };
   
   // Setup Parallax
   const { scrollYProgress } = useScroll({
@@ -146,35 +166,44 @@ export default function ChiSiamoPage() {
               {/* Bolle per Desktop */}
               <div className="absolute inset-0 z-10 hidden md:block">
                 {floatingRoles.map((role, i) => (
-                  <motion.div
+                  <motion.button
                     key={i}
                     initial={{ opacity: 0, scale: 0 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, margin: "100px" }}
                     transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.1 }}
                     className={`absolute ${role.pos} ${role.size}`}
+                    onClick={() => handleRoleClick(role.name)}
+                    aria-label={`Vai al dipartimento associato a ${role.name}`}
+                    type="button"
                   >
                     <motion.div
                       animate={{ y: [0, -25, 0], x: [0, 15, 0] }}
                       transition={{ duration: 6 + Math.random() * 4, repeat: Infinity, ease: "easeInOut", delay: role.delay }}
-                      className="w-full h-full rounded-full bg-white/[0.02] backdrop-blur-2xl border border-white/10 flex items-center justify-center p-6 text-center hover:bg-brand-red hover:border-brand-red/50 hover:scale-110 transition-all duration-500 cursor-default group shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+                      className="w-full h-full rounded-full bg-white/[0.02] backdrop-blur-2xl border border-white/10 flex items-center justify-center p-6 text-center hover:bg-brand-red hover:border-brand-red/50 hover:scale-110 active:scale-110 transition-all duration-500 cursor-pointer group shadow-[0_0_30px_rgba(0,0,0,0.5)]"
                     >
                       <span className="text-white/70 group-hover:text-black font-black uppercase text-sm lg:text-base leading-none tracking-widest transition-colors duration-300">
                         {role.name}
                       </span>
                     </motion.div>
-                  </motion.div>
+                  </motion.button>
                 ))}
               </div>
 
               {/* Bolle per Mobile */}
               <div className="md:hidden relative z-10 flex flex-wrap justify-center gap-4 px-4 pt-72 pb-12">
                  {floatingRoles.slice(0, 6).map((role, i) => (
-                    <div key={i} className="rounded-[2rem] bg-white/5 border border-white/10 px-6 py-4 flex items-center justify-center text-center shadow-xl backdrop-blur-md">
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleRoleClick(role.name)}
+                      aria-label={`Vai al dipartimento associato a ${role.name}`}
+                      className="rounded-[2rem] bg-white/5 border border-white/10 px-6 py-4 flex items-center justify-center text-center shadow-xl backdrop-blur-md hover:bg-brand-red/15 hover:border-brand-red/40 active:bg-brand-red/20 transition-colors"
+                    >
                       <span className="text-white/80 font-black uppercase text-[10px] tracking-widest">
                         {role.name}
                       </span>
-                    </div>
+                    </button>
                  ))}
               </div>
             </section>

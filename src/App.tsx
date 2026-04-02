@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Users, Mic2, Menu, X, Sparkles, Loader } from 'lucide-react';
 import academyLogo from './assets/logo/logo_accademia.png';
@@ -101,9 +101,9 @@ function HomePage() {
   const welcomeTitleLineOneWords = ["Benvenuti", "in", "Accademia:"];
   const welcomeTitleLineTwoWords = ["l'identità,", "il", "metodo,", "la", "visione."];
   const navItems = [
-    { label: 'Docenti', href: '#docenti' },
-    { label: 'Workshop', href: '#docenti' },
-    { label: 'Sala Prove', href: '#booking' },
+    { label: 'Docenti', href: '/#docenti' },
+    { label: 'Workshop', href: '/#docenti' },
+    { label: 'Sala Prove', href: '/#booking' },
   ];
 
   React.useEffect(() => {
@@ -217,7 +217,7 @@ function HomePage() {
               )}
             </div>
             <a href="/le-nostre-sale" className="hover:text-brand-red transition-colors">Le Nostre Sale</a>
-            <a href="#docenti" className="hover:text-brand-red transition-colors">Docenti</a>
+            <a href="/#docenti" className="hover:text-brand-red transition-colors">Docenti</a>
             <div className="relative group">
               <button className="hover:text-brand-red transition-colors flex items-center gap-1 uppercase tracking-[0.2em]">
                 Corsi <ChevronDown className="w-3 h-3 group-hover:rotate-180 transition-transform" />
@@ -227,7 +227,7 @@ function HomePage() {
                 <a href="/corsi/cinema" className="block rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white/70 hover:bg-brand-red/10 hover:text-brand-red transition-colors">Dipartimento Cinema</a>
               </div>
             </div>
-            <a href="#booking" className="hover:text-brand-red transition-colors">Sala Prove</a>
+            <a href="/#booking" className="hover:text-brand-red transition-colors">Sala Prove</a>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
@@ -464,7 +464,7 @@ function HomePage() {
       {/* ========================================================
           TEACHERS SECTION: ASYMMETRIC PARALLAX GALLERY
           ======================================================== */}
-      <section id="docenti" className="py-24 md:py-32 bg-[#030303] relative border-t border-white/5">
+      <section id="docenti" className="py-24 md:py-32 bg-[#030303] relative border-t border-white/5 scroll-mt-28 md:scroll-mt-32">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 md:mb-24 relative z-10">
             <div className="max-w-2xl">
@@ -581,7 +581,7 @@ function HomePage() {
               <h4 className="font-black mb-10 uppercase tracking-[0.3em] text-[10px] text-brand-red">Esplora</h4>
               <ul className="space-y-5 text-white/50 font-medium">
                 <li><a href="/corsi/musica" className="text-lg hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 group-hover:w-2 h-px bg-brand-red transition-all duration-300" /> Corsi di Strumento</a></li>
-                <li><a href="#docenti" className="text-lg hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 group-hover:w-2 h-px bg-brand-red transition-all duration-300" /> Masterclass</a></li>
+                <li><a href="/#docenti" className="text-lg hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 group-hover:w-2 h-px bg-brand-red transition-all duration-300" /> Masterclass</a></li>
                 <li><a href="/hollywood-recording-studio" className="text-lg hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 group-hover:w-2 h-px bg-brand-red transition-all duration-300" /> Recording Studio</a></li>
                 <li><a href="#" className="text-lg hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 group-hover:w-2 h-px bg-brand-red transition-all duration-300" /> Privacy Policy</a></li>
               </ul>
@@ -601,6 +601,25 @@ function HomePage() {
 // ============ MAIN APP CONTAINER ============
 
 function AppContent() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash) {
+      return;
+    }
+
+    const targetId = location.hash.replace('#', '');
+    const scrollToTarget = () => {
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    const animationFrame = window.requestAnimationFrame(scrollToTarget);
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [location.hash, location.pathname]);
+
   return (
     <React.Suspense
       fallback={

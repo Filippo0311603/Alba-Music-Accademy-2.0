@@ -10,6 +10,7 @@ import bcrypt from 'bcrypt';
 import {
   getAllBookings,
   getBookingsByDate,
+  getBookedTimesByDate,
   createBooking,
   updateBookingStatus,
   findBookingByConfirmToken,
@@ -654,8 +655,7 @@ app.get('/api/slots', async (req, res) => {
       return res.status(400).json({ error: 'date must be in YYYY-MM-DD format' });
     }
 
-    const bookings = await getBookingsByDate(date);
-    const bookedTimes = bookings.map((b) => b.time);
+    const bookedTimes = await getBookedTimesByDate(date);
 
     res.json({ bookedTimes });
   } catch (error) {

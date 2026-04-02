@@ -146,12 +146,9 @@ export default function MusicDepartmentPage() {
 
         {/* Cyberpunk Floating Stats */}
         <div className="absolute bottom-10 left-6 right-6 flex justify-between items-end border-t border-white/[0.05] pt-6 z-20 hidden md:flex">
-           <div>
-             <p className="text-[9px] uppercase tracking-[0.3em] font-black text-brand-red mb-1">Status</p>
-             <p className="text-white text-sm font-bold tracking-widest">ENROLLMENT OPEN</p>
-           </div>
-           <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }} className="w-px h-16 bg-brand-red" />
-           <div className="text-right">
+           
+           
+           <div className="text-center">
              <p className="text-[9px] uppercase tracking-[0.3em] font-black text-white/30 mb-1">Focus</p>
              <p className="text-white text-sm font-bold tracking-widest">100% LIVE READY</p>
            </div>
@@ -334,9 +331,7 @@ export default function MusicDepartmentPage() {
                     whileInView={{ opacity: 1, x: 0 }} 
                     viewport={{ once: true, margin: "-100px" }}
                   >
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-brand-red/20 bg-brand-red/5 text-brand-red text-[9px] font-black uppercase tracking-[0.4em] mb-8">
-                      <Star className="w-3 h-3" /> Ecosistema
-                    </div>
+                    
                     <h2 className="text-6xl md:text-8xl font-black uppercase leading-[0.8] tracking-tighter mb-8">
                       Il Nostro <br />
                       <span className="text-transparent stroke-text" style={{ WebkitTextStroke: '2px #61dee3' }}>Impegno</span>
