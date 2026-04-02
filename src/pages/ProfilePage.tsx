@@ -14,6 +14,7 @@ type Booking = {
   notes?: string;
   date: string;
   time: string;
+  end_time?: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   created_at: string;
   confirmed_at?: string;
@@ -61,6 +62,24 @@ export default function ProfilePage() {
 
     const hours = String(Number(match[1])).padStart(2, '0');
     return `${hours}:${match[2]}`;
+  };
+
+  const parseRangeEndTimeFromNotes = (notes?: string) => {
+    const value = String(notes || '');
+    const match = value.match(/\[ALBA_RANGE_END:(\d{2}:\d{2})\]/);
+    return match ? match[1] : undefined;
+  };
+
+  const formatBookingRangeItalian = (startTime: string, endTime?: string, notes?: string) => {
+    const normalizedStart = formatBookingTimeItalian(startTime);
+    const fallbackEndTime = endTime || parseRangeEndTimeFromNotes(notes);
+    const normalizedEnd = fallbackEndTime ? formatBookingTimeItalian(fallbackEndTime) : '';
+
+    if (!normalizedEnd) {
+      return normalizedStart;
+    }
+
+    return `${normalizedStart} - ${normalizedEnd}`;
   };
 
   // Redirect if not authenticated
@@ -320,7 +339,7 @@ export default function ProfilePage() {
                         <h3 className="text-4xl font-black leading-none mb-3 tracking-tighter text-white">{formatBookingDateItalian(booking.date)}</h3>
                         
                         <div className="flex items-center gap-2 text-white font-black text-2xl">
-                          <Clock className="w-5 h-5 text-brand-red" /> {formatBookingTimeItalian(booking.time)}
+                          <Clock className="w-5 h-5 text-brand-red" /> {formatBookingRangeItalian(booking.time, booking.end_time, booking.notes)}
                         </div>
                       </div>
 

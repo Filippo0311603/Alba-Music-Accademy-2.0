@@ -10,6 +10,7 @@ import bcrypt from 'bcrypt';
 import {
   getAllBookings,
   getBookingsByDate,
+  getActiveBookingsByDate,
   getBookedTimesByDate,
   createBooking,
   updateBookingStatus,
@@ -282,6 +283,126 @@ function normalizeTimeLabel(rawTime) {
   return `${hours}:${match[2]}`;
 }
 
+function timeToMinutes(rawTime) {
+  const normalized = normalizeTimeLabel(rawTime);
+  const match = normalized.match(/^(\d{2}):(\d{2})$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function minutesToTime(totalMinutes) {
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+  const minutes = String(totalMinutes % 60).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+function parseRangeEndTimeFromNotes(notes) {
+  const value = String(notes || '');
+  const match = value.match(/\[ALBA_RANGE_END:(\d{2}:\d{2})\]/);
+  return match ? normalizeTimeLabel(match[1]) : null;
+}
+
+function parseRangeSlotsFromNotes(notes) {
+  const value = String(notes || '');
+  const match = value.match(/\[ALBA_RANGE_SLOTS:([0-9:,]+)\]\s*$/);
+
+  if (!match) {
+    return [];
+  }
+
+  return match[1]
+    .split(',')
+    .map((slot) => normalizeTimeLabel(slot))
+    .filter((slot) => /^\d{2}:\d{2}$/.test(slot));
+}
+
+function cleanBookingNotes(notes) {
+  const value = String(notes || '');
+  return value
+    .replace(/\s*\[ALBA_RANGE_SLOTS:[0-9:,]+\]\s*$/, '')
+    .replace(/\s*\[ALBA_RANGE_END:\d{2}:\d{2}\]\s*$/, '')
+    .trim();
+}
+
+function getBookingEndTime(booking) {
+  const explicitEnd = normalizeTimeLabel(booking?.end_time);
+  if (/^\d{2}:\d{2}$/.test(explicitEnd)) {
+    return explicitEnd;
+  }
+
+  return parseRangeEndTimeFromNotes(booking?.notes);
+}
+
+function getBookingSlots(booking) {
+  const slotsFromNotes = parseRangeSlotsFromNotes(booking?.notes);
+  if (slotsFromNotes.length > 0) {
+    return [...new Set(slotsFromNotes)];
+  }
+
+  const start = normalizeTimeLabel(booking?.time);
+  const startMinutes = timeToMinutes(start);
+
+  if (startMinutes === null) {
+    return [];
+  }
+
+  const end = getBookingEndTime(booking);
+  const endMinutes = timeToMinutes(end);
+
+  if (endMinutes === null || endMinutes <= startMinutes) {
+    return [start];
+  }
+
+  const slots = [];
+  for (let cursor = startMinutes; cursor < endMinutes; cursor += 60) {
+    slots.push(minutesToTime(cursor));
+  }
+
+  return slots;
+}
+
+function rangesOverlap(leftSlots, rightSlots) {
+  const rightSet = new Set(rightSlots);
+  return leftSlots.some((slot) => rightSet.has(slot));
+}
+
+function appendRangeMetadataToNotes(notes, startTime, endTime) {
+  const cleaned = cleanBookingNotes(notes);
+  const startMinutes = timeToMinutes(startTime);
+  const endMinutes = timeToMinutes(endTime);
+
+  if (startMinutes === null || endMinutes === null || endMinutes <= startMinutes) {
+    return cleaned || null;
+  }
+
+  const slots = [];
+  for (let cursor = startMinutes; cursor < endMinutes; cursor += 60) {
+    slots.push(minutesToTime(cursor));
+  }
+
+  const metadata = [
+    `[ALBA_RANGE_END:${endTime}]`,
+    `[ALBA_RANGE_SLOTS:${slots.join(',')}]`,
+  ];
+
+  return cleaned ? `${cleaned}\n${metadata.join('\n')}` : metadata.join('\n');
+}
+
+function formatBookingTimeLabel(booking) {
+  const start = normalizeTimeLabel(booking?.time);
+  const end = getBookingEndTime(booking);
+
+  if (!end) {
+    return start;
+  }
+
+  return `${start} - ${end}`;
+}
+
 function validateBookingInput(payload) {
   const required = ['date', 'time'];
   for (const key of required) {
@@ -297,6 +418,23 @@ function validateBookingInput(payload) {
   }
   if (!timePattern.test(payload.time)) {
     return 'time must be in HH:mm format';
+  }
+
+  if (payload.endTime !== undefined && payload.endTime !== null) {
+    if (typeof payload.endTime !== 'string' || !timePattern.test(payload.endTime.trim())) {
+      return 'endTime must be in HH:mm format';
+    }
+
+    const startMinutes = timeToMinutes(payload.time);
+    const endMinutes = timeToMinutes(payload.endTime);
+
+    if (startMinutes === null || endMinutes === null || endMinutes <= startMinutes) {
+      return 'endTime must be greater than time';
+    }
+
+    if ((endMinutes - startMinutes) % 60 !== 0) {
+      return 'booking duration must be in 1-hour increments';
+    }
   }
 
   const startAt = parseBookingStart(payload.date, payload.time);
@@ -496,10 +634,8 @@ async function confirmBookingByToken(confirmToken) {
 
   // Check for slot conflict
   const bookings = await getBookingsByDate(booking.date);
-  const bookingTime = normalizeTimeLabel(booking.time);
-  const conflict = bookings.find(
-    (b) => b.id !== booking.id && b.status === 'confirmed' && normalizeTimeLabel(b.time) === bookingTime,
-  );
+  const bookingSlots = getBookingSlots(booking);
+  const conflict = bookings.find((b) => b.id !== booking.id && rangesOverlap(bookingSlots, getBookingSlots(b)));
 
   if (conflict) {
     await updateBookingStatus(booking.id, 'cancelled', {
@@ -534,14 +670,17 @@ async function cancelBookingByToken(cancelToken) {
 }
 
 function serializeBookingForAdmin(booking) {
+  const endTime = getBookingEndTime(booking);
+
   return {
     id: booking.id,
     fullName: booking.full_name,
     email: booking.email,
     phone: booking.phone,
-    notes: booking.notes,
+    notes: cleanBookingNotes(booking.notes),
     date: booking.date,
     time: booking.time,
+    endTime,
     status: booking.status,
     createdAt: booking.created_at,
     confirmedAt: booking.confirmed_at,
@@ -698,11 +837,12 @@ function destroySession(req) {
 async function sendConfirmationEmail(booking) {
   const confirmUrl = buildConfirmUrl(booking.confirmToken);
   const cancelUrl = buildCancelUrl(booking.cancelToken);
+  const bookingTimeLabel = formatBookingTimeLabel(booking);
   const subject = 'Conferma la tua prenotazione - Alba Music Academy';
-  const text = `Ciao ${booking.fullName},\n\nabbiamo ricevuto la tua richiesta per il ${booking.date} alle ${booking.time}.\n\nPer completare la prenotazione clicca qui: ${confirmUrl}\n\nSe vuoi annullare la richiesta: ${cancelUrl}\n\nGrazie.`;
+  const text = `Ciao ${booking.fullName},\n\nabbiamo ricevuto la tua richiesta per il ${booking.date} dalle ${bookingTimeLabel}.\n\nPer completare la prenotazione clicca qui: ${confirmUrl}\n\nSe vuoi annullare la richiesta: ${cancelUrl}\n\nGrazie.`;
   const html = `
     <p>Ciao <strong>${booking.fullName}</strong>,</p>
-    <p>abbiamo ricevuto la tua richiesta per <strong>${booking.date}</strong> alle <strong>${booking.time}</strong>.</p>
+    <p>abbiamo ricevuto la tua richiesta per <strong>${booking.date}</strong> dalle <strong>${bookingTimeLabel}</strong>.</p>
     <p>Per completare la prenotazione clicca su <strong>Conferma prenotazione</strong>:</p>
     <p style="display:flex;gap:10px;flex-wrap:wrap;">
       <a href="${confirmUrl}" style="display:inline-block;padding:10px 16px;background:#61dee3;color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:700;">Conferma prenotazione</a>
@@ -716,11 +856,12 @@ async function sendConfirmationEmail(booking) {
 
 async function sendReminderEmail(booking) {
   const cancelUrl = buildCancelUrl(booking.cancelToken);
+  const bookingTimeLabel = formatBookingTimeLabel(booking);
   const subject = 'Promemoria prenotazione - manca 1 giorno';
-  const text = `Ciao ${booking.fullName},\n\nti ricordiamo che domani hai la prenotazione alle ${booking.time}.\n\nSe vuoi disdire: ${cancelUrl}`;
+  const text = `Ciao ${booking.fullName},\n\nti ricordiamo che domani hai la prenotazione dalle ${bookingTimeLabel}.\n\nSe vuoi disdire: ${cancelUrl}`;
   const html = `
     <p>Ciao <strong>${booking.fullName}</strong>,</p>
-    <p>ti ricordiamo che <strong>domani</strong> hai la prenotazione alle <strong>${booking.time}</strong>.</p>
+    <p>ti ricordiamo che <strong>domani</strong> hai la prenotazione dalle <strong>${bookingTimeLabel}</strong>.</p>
     <p>Se vuoi disdire, clicca qui:</p>
     <p><a href="${cancelUrl}" style="display:inline-block;padding:10px 16px;background:#61dee3;color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:700;">Disdici prenotazione</a></p>
     <p>A presto,<br/>Alba Music Academy</p>
@@ -800,9 +941,11 @@ app.post('/api/bookings', requireUserAuth, async (req, res) => {
     }
 
     // Check for time slot conflict
-    const existingBookings = await getBookingsByDate(payload.date);
-    const requestedTime = normalizeTimeLabel(payload.time);
-    const conflict = existingBookings.find((b) => normalizeTimeLabel(b.time) === requestedTime);
+    const existingBookings = await getActiveBookingsByDate(payload.date);
+    const requestedStartTime = normalizeTimeLabel(payload.time);
+    const requestedEndTime = payload.endTime ? normalizeTimeLabel(payload.endTime) : null;
+    const requestedSlots = getBookingSlots({time: requestedStartTime, end_time: requestedEndTime});
+    const conflict = existingBookings.find((b) => rangesOverlap(requestedSlots, getBookingSlots(b)));
 
     if (conflict) {
       return res.status(409).json({error: 'slot is already booked'});
@@ -819,9 +962,10 @@ app.post('/api/bookings', requireUserAuth, async (req, res) => {
       email: user.email,
       full_name: user.full_name,
       phone: String(user.phone || '').trim() || null,
-      notes: String(payload.notes || '').trim() || null,
+      notes: appendRangeMetadataToNotes(payload.notes, requestedStartTime, requestedEndTime),
       date: payload.date,
-      time: payload.time,
+      time: requestedStartTime,
+      end_time: requestedEndTime,
       confirm_token: crypto.randomBytes(24).toString('hex'),
       cancel_token: crypto.randomBytes(24).toString('hex'),
       status: 'pending',
@@ -833,6 +977,8 @@ app.post('/api/bookings', requireUserAuth, async (req, res) => {
     try {
       await sendConfirmationEmail({
         ...booking,
+        time: requestedStartTime,
+        end_time: requestedEndTime,
         fullName: booking.full_name,
         confirmToken: booking.confirm_token,
         cancelToken: booking.cancel_token,
@@ -1018,10 +1164,7 @@ app.get('/api/admin/slots', requireAdminSession, async (req, res) => {
       return res.status(400).json({error: 'date must be in YYYY-MM-DD format'});
     }
 
-    const bookings = await getBookingsByDate(date);
-    const bookedTimes = bookings
-      .map((booking) => normalizeTimeLabel(booking.time))
-      .filter(Boolean);
+    const bookedTimes = await getBookedTimesByDate(date);
 
     return res.json({bookedTimes});
   } catch (error) {
@@ -1053,9 +1196,10 @@ app.post('/api/admin/bookings/manual', requireAllowedAdminOrigin, requireAdminSe
       return res.status(400).json({error: validationError});
     }
 
-    const existingBookings = await getBookingsByDate(date);
+    const existingBookings = await getActiveBookingsByDate(date);
     const selectedTime = normalizeTimeLabel(time);
-    const conflict = existingBookings.find((booking) => normalizeTimeLabel(booking.time) === selectedTime);
+    const requestedSlots = getBookingSlots({time: selectedTime});
+    const conflict = existingBookings.find((booking) => rangesOverlap(requestedSlots, getBookingSlots(booking)));
 
     if (conflict) {
       return res.status(409).json({error: 'slot is already booked'});
@@ -1300,7 +1444,13 @@ app.get('/api/auth/me', requireUserAuth, async (req, res) => {
 app.get('/api/user/bookings', requireUserAuth, async (req, res) => {
   try {
     const bookings = await getUserBookings(req.authUser.id);
-    return res.json({bookings});
+    return res.json({
+      bookings: bookings.map((booking) => ({
+        ...booking,
+        notes: cleanBookingNotes(booking.notes),
+        end_time: getBookingEndTime(booking),
+      })),
+    });
   } catch (error) {
     console.error('[api] GET /api/user/bookings error', error);
     res.status(500).json({error: 'Internal server error'});
@@ -1320,7 +1470,14 @@ app.post('/api/user/bookings/:id/cancel', requireUserAuth, async (req, res) => {
     }
 
     if (booking.status === 'cancelled') {
-      return res.json({message: 'La prenotazione risulta gia disdetta', booking});
+      return res.json({
+        message: 'La prenotazione risulta gia disdetta',
+        booking: {
+          ...booking,
+          notes: cleanBookingNotes(booking.notes),
+          end_time: getBookingEndTime(booking),
+        },
+      });
     }
 
     const updatedBooking = await updateBookingStatus(booking.id, 'cancelled', {
@@ -1329,7 +1486,11 @@ app.post('/api/user/bookings/:id/cancel', requireUserAuth, async (req, res) => {
 
     return res.json({
       message: 'Prenotazione disdetta con successo',
-      booking: updatedBooking,
+      booking: {
+        ...updatedBooking,
+        notes: cleanBookingNotes(updatedBooking.notes),
+        end_time: getBookingEndTime(updatedBooking),
+      },
     });
   } catch (error) {
     console.error('[api] POST /api/user/bookings/:id/cancel error', error);

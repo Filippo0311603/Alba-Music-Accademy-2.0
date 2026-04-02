@@ -43,6 +43,105 @@ function normalizeTimeLabel(rawTime) {
   return `${hours}:${match[2]}`;
 }
 
+function isMissingColumnError(rawMessage, columnName) {
+  const message = String(rawMessage || '').toLowerCase();
+  const column = String(columnName || '').toLowerCase();
+
+  if (!message || !column) {
+    return false;
+  }
+
+  return (
+    message.includes(`column '${column}'`) ||
+    message.includes(`column ${column}`) ||
+    message.includes(`'${column}' column`) ||
+    message.includes(`bookings.${column}`)
+  );
+}
+
+function parseRangeEndTimeFromNotes(notes) {
+  const value = String(notes || '');
+  const match = value.match(/\[ALBA_RANGE_END:(\d{2}:\d{2})\]/);
+  return match ? normalizeTimeLabel(match[1]) : null;
+}
+
+function parseRangeSlotsFromNotes(notes) {
+  const value = String(notes || '');
+  const match = value.match(/\[ALBA_RANGE_SLOTS:([0-9:,]+)\]\s*$/);
+
+  if (!match) {
+    return [];
+  }
+
+  return match[1]
+    .split(',')
+    .map((slot) => normalizeTimeLabel(slot))
+    .filter((slot) => /^\d{2}:\d{2}$/.test(slot));
+}
+
+function timeToMinutes(rawTime) {
+  const normalized = normalizeTimeLabel(rawTime);
+  const match = normalized.match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function minutesToTime(totalMinutes) {
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+  const minutes = String(totalMinutes % 60).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+function getBookingTimeSlots(booking) {
+  const slotsFromNotes = parseRangeSlotsFromNotes(booking?.notes);
+  if (slotsFromNotes.length > 0) {
+    return [...new Set(slotsFromNotes)];
+  }
+
+  const start = normalizeTimeLabel(booking?.time);
+  const startMinutes = timeToMinutes(start);
+
+  if (startMinutes === null) {
+    return [];
+  }
+
+  const parsedEnd = normalizeTimeLabel(booking?.end_time || parseRangeEndTimeFromNotes(booking?.notes));
+  const endMinutes = timeToMinutes(parsedEnd);
+
+  if (endMinutes === null || endMinutes <= startMinutes) {
+    return [start];
+  }
+
+  const slots = [];
+  for (let cursor = startMinutes; cursor < endMinutes; cursor += 60) {
+    slots.push(minutesToTime(cursor));
+  }
+
+  return slots;
+}
+
+function shouldIncludeAsBlockedSlot(booking) {
+  const status = String(booking?.status || '').toLowerCase();
+
+  if (!status || status === 'confirmed') {
+    return true;
+  }
+
+  if (status === 'pending') {
+    const holdMinutes = Number(process.env.PENDING_BOOKING_HOLD_MINUTES || 30);
+    const holdMs = Number.isFinite(holdMinutes) && holdMinutes > 0 ? holdMinutes * 60 * 1000 : 30 * 60 * 1000;
+    const createdAtMs = booking?.created_at ? new Date(booking.created_at).getTime() : NaN;
+
+    if (!Number.isFinite(createdAtMs)) {
+      return false;
+    }
+
+    return Date.now() - createdAtMs <= holdMs;
+  }
+
+  return false;
+}
+
 /**
  * Fetches all bookings (for admin panel)
  */
@@ -99,12 +198,29 @@ export async function getBookingsByDate(date) {
 export async function getBookedTimesByDate(date) {
   const result = await supabase
     .from('bookings')
-    .select('time, status')
+    .select('time, status, end_time, notes, created_at')
     .eq('date', date);
 
   if (result.error) {
-    const message = String(result.error.message || '').toLowerCase();
-    const missingStatusColumn = message.includes("column 'status'") || message.includes('column bookings.status');
+    const message = String(result.error.message || '');
+    const missingStatusColumn = isMissingColumnError(message, 'status');
+    const missingEndTimeColumn = isMissingColumnError(message, 'end_time');
+
+    if (missingEndTimeColumn && !missingStatusColumn) {
+      const withoutEndTime = await supabase
+        .from('bookings')
+        .select('time, status, notes, created_at')
+        .eq('date', date);
+
+      if (withoutEndTime.error) {
+        throw withoutEndTime.error;
+      }
+
+      return (withoutEndTime.data || [])
+        .filter((booking) => shouldIncludeAsBlockedSlot(booking))
+        .flatMap((booking) => getBookingTimeSlots(booking))
+        .filter(Boolean);
+    }
 
     if (!missingStatusColumn) {
       throw result.error;
@@ -112,7 +228,7 @@ export async function getBookedTimesByDate(date) {
 
     const legacy = await supabase
       .from('bookings')
-      .select('time')
+      .select('time, notes, created_at')
       .eq('date', date);
 
     if (legacy.error) {
@@ -120,31 +236,65 @@ export async function getBookedTimesByDate(date) {
     }
 
     return (legacy.data || [])
-      .map((booking) => normalizeTimeLabel(booking?.time))
+      .flatMap((booking) => getBookingTimeSlots(booking))
       .filter(Boolean);
   }
 
   return (result.data || [])
-    .filter((booking) => {
-      const status = String(booking?.status || '').toLowerCase();
-      return !status || status === 'confirmed';
-    })
-    .map((booking) => normalizeTimeLabel(booking?.time))
+    .filter((booking) => shouldIncludeAsBlockedSlot(booking))
+    .flatMap((booking) => getBookingTimeSlots(booking))
     .filter(Boolean);
+}
+
+/**
+ * Fetches bookings for a specific date that should actively block new bookings
+ * (confirmed + recent pending holds).
+ */
+export async function getActiveBookingsByDate(date) {
+  const result = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('date', date);
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return (result.data || []).filter((booking) => shouldIncludeAsBlockedSlot(booking));
 }
 
 /**
  * Creates a new booking
  */
 export async function createBooking(bookingData) {
-  const { data, error } = await supabase
+  const firstAttempt = await supabase
     .from('bookings')
     .insert([bookingData])
     .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  if (!firstAttempt.error) {
+    return firstAttempt.data;
+  }
+
+  const message = String(firstAttempt.error.message || '');
+  const missingEndTimeColumn = isMissingColumnError(message, 'end_time');
+
+  if (!missingEndTimeColumn) {
+    throw firstAttempt.error;
+  }
+
+  const fallbackPayload = { ...bookingData };
+  delete fallbackPayload.end_time;
+
+  const fallbackAttempt = await supabase
+    .from('bookings')
+    .insert([fallbackPayload])
+    .select()
+    .single();
+
+  if (fallbackAttempt.error) throw fallbackAttempt.error;
+  return fallbackAttempt.data;
 }
 
 /**

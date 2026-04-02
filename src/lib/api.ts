@@ -85,6 +85,7 @@ export const bookingAPI = {
   createBooking: (data: {
     date: string;
     time: string;
+    endTime?: string;
     notes?: string;
   }) => apiCall('/api/bookings', {
     method: 'POST',

@@ -14,6 +14,7 @@ export default function BookingCalendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedDurationHours, setSelectedDurationHours] = useState(1);
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,7 +37,79 @@ export default function BookingCalendar() {
     return `${match[1].padStart(2, '0')}:${match[2]}`;
   };
 
+  const timeToMinutes = (rawTime: string) => {
+    const normalized = normalizeTimeLabel(rawTime);
+    const match = normalized.match(/^(\d{2}):(\d{2})$/);
+
+    if (!match) {
+      return null;
+    }
+
+    return Number(match[1]) * 60 + Number(match[2]);
+  };
+
+  const minutesToTime = (totalMinutes: number) => {
+    const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+    const minutes = String(totalMinutes % 60).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   const selectedDateKey = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
+
+  const isBookedSlot = (time: string) => bookedTimes.includes(normalizeTimeLabel(time));
+
+  const isUnavailableSlot = (time: string) => isBookedSlot(time) || isPastSlot(time);
+
+  const getMaxDurationFromStart = (startTime: string) => {
+    const startIndex = times.indexOf(startTime);
+    if (startIndex === -1 || isUnavailableSlot(startTime)) {
+      return 0;
+    }
+
+    let maxDuration = 1;
+
+    for (let i = startIndex + 1; i < times.length; i += 1) {
+      const prevMinutes = timeToMinutes(times[i - 1]);
+      const currentMinutes = timeToMinutes(times[i]);
+
+      if (prevMinutes === null || currentMinutes === null || currentMinutes - prevMinutes !== 60) {
+        break;
+      }
+
+      if (isUnavailableSlot(times[i])) {
+        break;
+      }
+
+      maxDuration += 1;
+    }
+
+    return maxDuration;
+  };
+
+  const selectedEndTime = useMemo(() => {
+    if (!selectedTime) {
+      return null;
+    }
+
+    const startMinutes = timeToMinutes(selectedTime);
+    if (startMinutes === null) {
+      return null;
+    }
+
+    return minutesToTime(startMinutes + selectedDurationHours * 60);
+  }, [selectedDurationHours, selectedTime]);
+
+  const selectedRangeLabel = useMemo(() => {
+    if (!selectedTime || !selectedEndTime) {
+      return null;
+    }
+
+    if (selectedDurationHours <= 1) {
+      return `${selectedTime} - ${selectedEndTime} (1 ora)`;
+    }
+
+    return `${selectedTime} - ${selectedEndTime} (${selectedDurationHours} ore)`;
+  }, [selectedDurationHours, selectedEndTime, selectedTime]);
 
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
@@ -67,8 +140,26 @@ export default function BookingCalendar() {
 
   useEffect(() => {
     setSelectedTime(null);
+    setSelectedDurationHours(1);
     loadBookedTimes();
   }, [selectedDateKey]);
+
+  useEffect(() => {
+    if (!selectedTime) {
+      return;
+    }
+
+    const maxDuration = getMaxDurationFromStart(selectedTime);
+    if (maxDuration === 0) {
+      setSelectedTime(null);
+      setSelectedDurationHours(1);
+      return;
+    }
+
+    if (selectedDurationHours > maxDuration) {
+      setSelectedDurationHours(maxDuration);
+    }
+  }, [bookedTimes, selectedDurationHours, selectedTime]);
 
   const submitBooking = async () => {
     if (!isAuthenticated) {
@@ -81,6 +172,11 @@ export default function BookingCalendar() {
       return;
     }
 
+    if (!selectedEndTime) {
+      setFeedback({type: 'error', message: 'Intervallo orario non valido. Seleziona di nuovo l\'orario.'});
+      return;
+    }
+
     setIsSubmitting(true);
     setFeedback(null);
 
@@ -88,6 +184,8 @@ export default function BookingCalendar() {
       const data = await bookingAPI.createBooking({
         date: selectedDateKey,
         time: selectedTime,
+        endTime: selectedEndTime || undefined,
+        notes: formData.notes.trim() || undefined,
       });
 
       setFeedback({
@@ -106,7 +204,9 @@ export default function BookingCalendar() {
           ? `La richiesta e stata salvata, ma non siamo riusciti a inviare la email a ${destinationEmail}. Riprova tra poco o contatta l'accademia.`
           : `Per completare la prenotazione devi cliccare il bottone "Conferma prenotazione" nella email inviata a ${destinationEmail}.`,
       });
-       setFormData({notes: ''});      setSelectedTime(null);
+      setFormData({notes: ''});
+      setSelectedTime(null);
+      setSelectedDurationHours(1);
       await loadBookedTimes();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore imprevisto durante la prenotazione.';
@@ -238,7 +338,7 @@ export default function BookingCalendar() {
             Orari Disponibili
           </h3>
           <p className="text-sm text-white/60 mb-6">
-            Seleziona un orario per il {format(selectedDate, 'd MMMM', { locale: it })}
+            Seleziona orario di inizio e durata per il {format(selectedDate, 'd MMMM', { locale: it })}
           </p>
           <p className="text-xs text-white/45 mb-6">
             Dopo "Prenota Ora" riceverai una email con il bottone "Conferma prenotazione". Il reminder verrà inviato automaticamente entro le 24h precedenti solo dopo la conferma.
@@ -251,13 +351,22 @@ export default function BookingCalendar() {
           <div className="grid grid-cols-3 gap-2 mb-8">
             {times.map((time) => (
               (() => {
-                const isBooked = bookedTimes.includes(time);
+                const isBooked = isBookedSlot(time);
                 const isPast = isPastSlot(time);
                 const unavailable = isBooked || isPast;
                 return (
               <button
                 key={time}
-                onClick={() => setSelectedTime(time)}
+                onClick={() => {
+                  if (selectedTime === time) {
+                    setSelectedTime(null);
+                    setSelectedDurationHours(1);
+                    return;
+                  }
+
+                  setSelectedTime(time);
+                  setSelectedDurationHours(1);
+                }}
                 disabled={unavailable}
                 className={cn(
                   "py-2 text-sm rounded-md border border-white/10 transition-all",
@@ -271,6 +380,39 @@ export default function BookingCalendar() {
               })()
             ))}
           </div>
+
+          {selectedTime && (() => {
+            const maxDuration = getMaxDurationFromStart(selectedTime);
+            const durationChoices = Array.from({length: maxDuration}, (_, idx) => idx + 1);
+
+            return (
+              <div className="mb-6 rounded-xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-widest text-white/45 mb-3">Durata</p>
+                <div className="flex flex-wrap gap-2">
+                  {durationChoices.map((duration) => (
+                    <button
+                      key={duration}
+                      type="button"
+                      onClick={() => setSelectedDurationHours(duration)}
+                      className={cn(
+                        'rounded-lg border px-3 py-1.5 text-sm transition-colors',
+                        selectedDurationHours === duration
+                          ? 'border-brand-red bg-brand-red text-black font-bold'
+                          : 'border-white/15 text-white/75 hover:bg-white/10',
+                      )}
+                    >
+                      {duration} {duration === 1 ? 'ora' : 'ore'}
+                    </button>
+                  ))}
+                </div>
+                {selectedRangeLabel && (
+                  <p className="mt-3 text-sm text-white/80">
+                    Fascia selezionata: <span className="font-semibold text-brand-red">{selectedRangeLabel}</span>
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="space-y-3 mb-6">
             <div>
