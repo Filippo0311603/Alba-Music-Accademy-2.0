@@ -1,5 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import {format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, eachDayOfInterval} from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Clock, X } from 'lucide-react';
@@ -175,6 +176,53 @@ export default function BookingCalendar() {
     );
   };
 
+  const confirmationModal = confirmationPopup && typeof document !== 'undefined'
+    ? createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+            onClick={() => setConfirmationPopup(null)}
+          />
+
+          {/* Modal */}
+          <div className="fixed inset-0 z-[101] flex items-end sm:items-center justify-center p-3 sm:p-4">
+            <div
+              className="relative w-full max-w-md rounded-2xl border-2 border-brand-red bg-dark-card p-5 sm:p-8 shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[85svh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setConfirmationPopup(null)}
+                className="absolute top-3 right-3 p-1 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-white/60 hover:text-white" />
+              </button>
+
+              {/* Title */}
+              <h4 className="text-xl sm:text-2xl font-black uppercase mb-4 text-brand-red pr-8">
+                {confirmationPopup.title}
+              </h4>
+
+              {/* Message */}
+              <p className="text-sm sm:text-base text-white/80 leading-relaxed mb-6 sm:mb-8 font-medium">
+                {confirmationPopup.message}
+              </p>
+
+              {/* Action Button */}
+              <button
+                onClick={() => setConfirmationPopup(null)}
+                className="w-full py-3 sm:py-4 rounded-xl bg-brand-red text-black font-bold text-base sm:text-lg hover:bg-brand-red/90 transition-all active:scale-95"
+              >
+                Ho capito
+              </button>
+            </div>
+          </div>
+        </>,
+        document.body,
+      )
+    : null;
+
   return (
     <div className="glass-card max-w-4xl mx-auto">
       <div className="grid md:grid-cols-2 gap-12">
@@ -275,50 +323,8 @@ export default function BookingCalendar() {
         </div>
       </div>
 
-      {/* SUCCESS MODAL - Overlay con backdrop */}
-      {confirmationPopup && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
-            onClick={() => setConfirmationPopup(null)}
-          />
-          
-          {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div 
-              className="w-full max-w-md rounded-2xl border-2 border-brand-red bg-dark-card p-8 shadow-2xl animate-in fade-in zoom-in duration-300"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <button
-                onClick={() => setConfirmationPopup(null)}
-                className="absolute top-4 right-4 p-1 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-white/60 hover:text-white" />
-              </button>
-
-              {/* Title */}
-              <h4 className="text-2xl font-black uppercase mb-4 text-brand-red pr-8">
-                {confirmationPopup.title}
-              </h4>
-
-              {/* Message */}
-              <p className="text-base text-white/80 leading-relaxed mb-8 font-medium">
-                {confirmationPopup.message}
-              </p>
-
-              {/* Action Button */}
-              <button
-                onClick={() => setConfirmationPopup(null)}
-                className="w-full py-4 rounded-xl bg-brand-red text-black font-bold text-lg hover:bg-brand-red/90 transition-all active:scale-95"
-              >
-                Ho capito
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      {/* SUCCESS MODAL */}
+      {confirmationModal}
     </div>
   );
 }
