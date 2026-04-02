@@ -92,7 +92,7 @@ function HomePage() {
   const opacityText = useTransform(scrollYProgress, [0, 1], isTouchViewport ? [1, 0.18] : [1, 0]);
 
   const welcomeAnimatedWords = [
-    "Alba", "Music", "Academy", "e", "una", "scuola", "di", "riferimento,",
+    "Alba", "Music", "Academy", "è", "una", "scuola", "di", "riferimento,",
     "apprezzata", "in", "Italia", "e", "all'estero", "da", "chi", "vuole",
     "fare", "Musica.", "Il", "nostro", "metodo", "si", "basa", "sulla",
     "pratica", "costante", "e", "sul", "confronto", "con", "i", "migliori",
