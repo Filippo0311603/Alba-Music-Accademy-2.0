@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring } from 'motion/react';
-import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, Youtube, User, LogOut, Users, Mic2, Menu, X, Sparkles, Loader } from 'lucide-react';
+import { ChevronDown, ArrowRight, Phone, Mail, MapPin, Instagram, Facebook, User, LogOut, Users, Mic2, Menu, X, Sparkles, Loader } from 'lucide-react';
 import academyLogo from './assets/logo/logo_accademia.png';
 import heroHomepageImage from './assets/pages/home/hero-homepage.jpg';
 
@@ -553,9 +553,8 @@ function HomePage() {
                 Coltiviamo il talento, definiamo lo stile, lanciamo carriere. Formazione d'eccellenza nel cuore del litorale romano.
               </p>
               <div className="flex gap-4 relative z-10">
-                <a href="#" className="w-14 h-14 rounded-[1.5rem] border border-white/10 bg-[#0a0a0a] flex items-center justify-center hover:bg-brand-red hover:border-brand-red hover:text-black transition-all duration-500 text-white/40 shadow-xl"><Instagram className="w-6 h-6" /></a>
-                <a href="#" className="w-14 h-14 rounded-[1.5rem] border border-white/10 bg-[#0a0a0a] flex items-center justify-center hover:bg-brand-red hover:border-brand-red hover:text-black transition-all duration-500 text-white/40 shadow-xl"><Facebook className="w-6 h-6" /></a>
-                <a href="#" className="w-14 h-14 rounded-[1.5rem] border border-white/10 bg-[#0a0a0a] flex items-center justify-center hover:bg-brand-red hover:border-brand-red hover:text-black transition-all duration-500 text-white/40 shadow-xl"><Youtube className="w-6 h-6" /></a>
+                <a href="https://www.instagram.com/alba_music_academy/" target="_blank" rel="noopener noreferrer" aria-label="Instagram Alba Music Academy" className="w-14 h-14 rounded-[1.5rem] border border-white/10 bg-[#0a0a0a] flex items-center justify-center hover:bg-brand-red hover:border-brand-red hover:text-black transition-all duration-500 text-white/40 shadow-xl"><Instagram className="w-6 h-6" /></a>
+                <a href="https://www.facebook.com/cechidicekomtrio/?locale=it_IT" target="_blank" rel="noopener noreferrer" aria-label="Facebook Alba Music Academy" className="w-14 h-14 rounded-[1.5rem] border border-white/10 bg-[#0a0a0a] flex items-center justify-center hover:bg-brand-red hover:border-brand-red hover:text-black transition-all duration-500 text-white/40 shadow-xl"><Facebook className="w-6 h-6" /></a>
               </div>
             </div>
 
